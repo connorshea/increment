@@ -445,15 +445,15 @@ export function createBackground(canvas) {
     g.lineWidth = 8;
     g.lineCap = 'butt';
     g.lineJoin = 'round';
-    g.strokeStyle = rgba(color, 0.2);
+    g.strokeStyle = rgba(color, 0.13);
     g.stroke();
     g.setLineDash([]);
   }
 
   /** Two rails, offset either side of the route's centre line. */
   function drawRails(g, pts, color) {
-    g.strokeStyle = rgba(color, 0.5);
-    g.lineWidth = 1.3;
+    g.strokeStyle = rgba(color, 0.32);
+    g.lineWidth = 1.25;
     g.lineCap = 'round';
     for (const side of [-1, 1]) {
       g.beginPath();
@@ -483,7 +483,7 @@ export function createBackground(canvas) {
       ctx.roundRect(-CAR / 2 - 1, -4.2, CAR + 2, 8.4, 2.4);
       ctx.fill();
       if (k === 0) {
-        ctx.fillStyle = rgba(line.color, 0.95);
+        ctx.fillStyle = rgba(line.color, 0.8);
         ctx.beginPath();
         ctx.roundRect(-CAR / 2, -3.4, CAR, 6.8, 2);
         ctx.fill();
@@ -493,10 +493,10 @@ export function createBackground(canvas) {
         ctx.beginPath();
         ctx.roundRect(-CAR / 2, -2.7, CAR, 5.4, 1.4);
         ctx.fill();
-        ctx.strokeStyle = rgba(line.color, 0.75);
+        ctx.strokeStyle = rgba(line.color, 0.6);
         ctx.lineWidth = 1.1;
         ctx.stroke();
-        ctx.fillStyle = rgba(line.color, 0.55);
+        ctx.fillStyle = rgba(line.color, 0.45);
         ctx.fillRect(-CAR / 2 + 1.6, -2.4, CAR - 3.2, 2);
       }
       ctx.restore();
@@ -519,7 +519,7 @@ export function createBackground(canvas) {
     ctx.fillStyle = 'rgba(10, 13, 18, 0.96)';
     ctx.fill();
 
-    ctx.strokeStyle = `rgba(215, 224, 235, ${0.46 * station.reveal})`;
+    ctx.strokeStyle = `rgba(215, 224, 235, ${0.38 * station.reveal})`;
     ctx.lineWidth = station.lines >= 2 ? 2.2 : 1.7;
     shapePath(station.x, station.y, r, station.shape);
     ctx.stroke();
