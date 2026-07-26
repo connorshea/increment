@@ -190,6 +190,8 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   transition: transform 0.08s ease, box-shadow 0.25s ease;
   box-shadow: 0 0 40px rgba(233, 164, 75, 0.12), inset 0 0 30px rgba(0, 0, 0, 0.65);
   user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
 }
 .loader:hover { box-shadow: 0 0 60px rgba(233, 164, 75, 0.24), inset 0 0 30px rgba(0, 0, 0, 0.55); }
@@ -220,6 +222,12 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   border: 1px solid rgba(233, 164, 75, 0.18);
   animation: breathe 4.5s ease-in-out infinite;
   pointer-events: none;
+}
+
+/* While held, the ring charges up to each automatic haul. */
+.loader.holding .loader-glow {
+  animation: hold-charge 2s linear infinite;
+  border-color: rgba(233, 164, 75, 0.5);
 }
 
 .haul-value { margin: 0; font-size: 0.85rem; color: var(--ink-dim); }
@@ -578,6 +586,11 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   50% { transform: scale(1.045); opacity: 0.15; }
 }
 @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@keyframes hold-charge {
+  0% { opacity: 0.1; transform: scale(1); }
+  88% { opacity: 0.6; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
 @keyframes jostle {
   0%, 100% { transform: translateY(0) rotate(-5deg); }
   50% { transform: translateY(-12px) rotate(5deg); }

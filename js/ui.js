@@ -94,6 +94,33 @@ export function initUI(handlers) {
 
   el.loader.addEventListener('click', (ev) => handlers.onHaul(ev));
 
+  // Hold the loader down and it keeps working on its own, once every couple of
+  // seconds, so a long shift doesn't have to be a thousand separate clicks.
+  const HOLD_INTERVAL = 2000;
+  let holdTimer = null;
+  let holdAt = { clientX: 0, clientY: 0 };
+
+  function stopHold() {
+    if (holdTimer !== null) {
+      clearInterval(holdTimer);
+      holdTimer = null;
+    }
+    el.loader.classList.remove('holding');
+  }
+
+  el.loader.addEventListener('pointerdown', (ev) => {
+    stopHold();
+    holdAt = { clientX: ev.clientX, clientY: ev.clientY };
+    el.loader.classList.add('holding');
+    holdTimer = setInterval(() => handlers.onHaul(holdAt), HOLD_INTERVAL);
+  });
+  for (const evt of ['pointerup', 'pointerleave', 'pointercancel']) {
+    el.loader.addEventListener(evt, stopHold);
+  }
+  window.addEventListener('blur', stopHold);
+  // A long press on a touchscreen shouldn't pop up the callout menu.
+  el.loader.addEventListener('contextmenu', (ev) => ev.preventDefault());
+
   document.querySelectorAll('.tab').forEach((tab) => {
     tab.addEventListener('click', () => {
       activeTab = tab.dataset.tab;
