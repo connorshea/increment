@@ -313,7 +313,10 @@ export function createBackground(canvas) {
   }
 
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Capped at 1.5 rather than 2: on a Retina display that is 44% fewer pixels
+    // to clear, blit and composite every frame, and on a dim decorative map
+    // behind the page the difference is not one you can pick out.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     width = canvas.clientWidth || window.innerWidth;
     height = canvas.clientHeight || window.innerHeight;
     canvas.width = Math.max(1, Math.floor(width * dpr));
@@ -630,15 +633,23 @@ export function createBackground(canvas) {
     }
   }
 
+  // Ambient scenery does not need 60fps, and redrawing a full-viewport canvas
+  // is the most expensive thing the page does. Half the frames, half the heat;
+  // at this speed — slow trains, a slowly growing map — it looks the same.
+  const FRAME_MS = 1000 / 30;
+
   function frame(now) {
     if (!running) return;
-    const dt = Math.min((now - lastFrame) / 1000, 0.5);
-    lastFrame = now;
-    if (enabled) {
-      step(dt);
-      draw();
-    }
     requestAnimationFrame(frame);
+
+    const since = now - lastFrame;
+    if (since < FRAME_MS) return;
+    lastFrame = now;
+
+    // A hidden tab still fires rAF in some browsers; there is nothing to see.
+    if (!enabled || document.hidden) return;
+    step(Math.min(since / 1000, 0.5));
+    draw();
   }
 
   window.addEventListener("resize", debounce(resize, 200));

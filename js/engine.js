@@ -385,6 +385,9 @@ export function tick(S, dt, stats) {
 
 /** Returns newly unlocked milestones (and records them). */
 export function checkAchievements(S, stats) {
+  // Once they are all earned there is nothing left to test, and this runs
+  // forever in the loop.
+  if (S.achievements.length >= ACHIEVEMENTS.length) return [];
   const got = new Set(S.achievements);
   const fresh = [];
   for (const a of ACHIEVEMENTS) {

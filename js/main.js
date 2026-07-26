@@ -25,7 +25,7 @@ import { decodeSave, encodeSave, freshState, load, save, wipe } from "./state.js
 import { initUI } from "./ui.js";
 
 const AUTOSAVE_MS = 20_000;
-const RENDER_MS = 66; // ~15fps for the DOM; the simulation itself runs every frame
+const STEP_MS = 50; // one 20Hz clock for the simulation and the interface alike
 const PARCELS_AFTER = 500; // no express parcels until the railway is actually moving
 const CONDUCTOR_MS = 1500; // how often the conductor signs off one more work
 const SUPERCONDUCTOR_MS = 2000; // how often the superconductor places a stock order
@@ -263,14 +263,22 @@ function refresh() {
 }
 
 let lastFrame = performance.now();
-let lastRender = 0;
 let lastSaveAt = performance.now();
 let lastConductorAt = performance.now();
 let lastSuperAt = performance.now();
 
 function loop(now) {
-  const dt = Math.min((now - lastFrame) / 1000, 1);
+  requestAnimationFrame(loop);
+
+  // rAF fires at the display's refresh rate — 120 times a second on a ProMotion
+  // Mac — but nothing here needs to happen that often. Everything below runs on
+  // one 20Hz clock instead. No accuracy is lost: `tick` is handed the real
+  // elapsed time, so the cargo works out identically either way. rAF is still
+  // what drives it, because it stops on its own when the tab is hidden.
+  const elapsed = now - lastFrame;
+  if (elapsed < STEP_MS) return;
   lastFrame = now;
+  const dt = Math.min(elapsed / 1000, 1);
 
   stats = computeStats(S);
   tick(S, dt, stats);
@@ -305,26 +313,21 @@ function loop(now) {
 
   maybeSpawnParcel(Date.now());
 
-  if (now - lastRender > RENDER_MS) {
-    lastRender = now;
-    ui.render(S, stats);
-    const busyness = Math.log10(1 + stats.perSec) / 12;
-    // The map reaches further the more you have actually built.
-    const stock = Object.values(S.gens).reduce((a, b) => a + b, 0);
-    background.update({
-      growth: S.upgrades.length + Math.min(14, stock / 4),
-      busy: busyness,
-      regauges: S.regauges,
-    });
-    audio.setIntensity(busyness);
-  }
+  ui.render(S, stats);
+  const busyness = Math.log10(1 + stats.perSec) / 12;
+  // The map reaches further the more you have actually built.
+  const stock = Object.values(S.gens).reduce((a, b) => a + b, 0);
+  background.update({
+    growth: S.upgrades.length + Math.min(14, stock / 4),
+    busy: busyness,
+    regauges: S.regauges,
+  });
+  audio.setIntensity(busyness);
 
   if (now - lastSaveAt > AUTOSAVE_MS) {
     lastSaveAt = now;
     if (save(S)) ui.setSaveStatus(`saved ${new Date().toLocaleTimeString()}`);
   }
-
-  requestAnimationFrame(loop);
 }
 
 // ---------------------------------------------------------------------------

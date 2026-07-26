@@ -1,7 +1,7 @@
 :root {
   --bg: #080a0e;
   --bg-2: #10141b;
-  --panel: rgba(21, 26, 34, 0.84);
+  --panel: rgba(21, 26, 34, 0.93);
   --panel-edge: rgba(233, 164, 75, 0.16);
   --ink: #e4e1da;
   --ink-dim: #a09a8f;
@@ -117,8 +117,10 @@ h4 {
     rgba(8, 10, 14, 0.93) 68%,
     rgba(8, 10, 14, 0) 100%
   );
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  /* No backdrop-filter here. The bar is already 97% opaque, so a blur behind
+     it bought almost nothing visually — but because the map animates behind
+     it, the compositor had to recompute a full-width blur every single frame.
+     That was the most expensive thing on the page by a wide margin. */
   pointer-events: none;
   z-index: -1;
 }
@@ -224,10 +226,11 @@ h4 {
   align-items: start;
 }
 
+/* Likewise no backdrop-filter: the panels sit over an animating canvas, so a
+   blurred backdrop is re-rendered every frame for something you can barely
+   see. Slightly more opaque instead, which reads much the same. */
 .panel {
   background: var(--panel);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--panel-edge);
   border-radius: var(--radius);
   box-shadow: var(--shadow);

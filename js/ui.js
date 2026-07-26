@@ -19,6 +19,17 @@ import { fmt, fmtClock, fmtMult, fmtPct, fmtTime } from "./format.js";
 const $ = (sel) => document.querySelector(sel);
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/**
+ * Writes only when the text actually changed. Most of what the interface shows
+ * is unchanged between renders — a counter that reads the same, a cost that has
+ * not moved — and assigning textContent regardless makes the browser redo style
+ * and layout work for nothing, fifteen times a second, across a hundred nodes.
+ */
+function setText(node, value) {
+  const text = String(value);
+  if (node.textContent !== text) node.textContent = text;
+}
+
 export function initUI(handlers) {
   const el = {
     cargo: $("#cargo"),
@@ -70,6 +81,8 @@ export function initUI(handlers) {
   let genSig = null;
   let conductorShown = null;
   let superShown = null;
+  let buffbarHtml = null;
+  const statCells = [];
   const genRows = new Map();
   const spikeRows = new Map();
   const achRows = new Map();
@@ -194,8 +207,10 @@ export function initUI(handlers) {
       const t = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 0.55));
       el.bgCanvas.style.opacity = (0.8 + t * 0.2).toFixed(3);
       // Brighten only once the game is out of the way — behind the panels it
-      // wants to stay understated.
-      el.bgCanvas.style.filter = `brightness(${(1 + t * 0.55).toFixed(3)})`;
+      // wants to stay understated. `none` rather than brightness(1) at the top:
+      // any filter at all puts the canvas on its own render surface, which is
+      // real work every frame for something that is, at t = 0, a no-op.
+      el.bgCanvas.style.filter = t > 0.002 ? `brightness(${(1 + t * 0.55).toFixed(3)})` : "none";
     },
     { passive: true },
   );
@@ -268,15 +283,14 @@ export function initUI(handlers) {
       const cost = genCost(gen, owned, count);
       const canAfford = buyAmount === "max" ? affordableCount >= 1 : cost <= S.cargo;
 
-      row.cost.textContent = `${fmt(cost)}${count > 1 ? ` ·×${count}` : ""}`;
+      setText(row.cost, `${fmt(cost)}${count > 1 ? ` ·×${count}` : ""}`);
       row.cost.classList.toggle("too-dear", !canAfford);
-      row.owned.textContent = owned;
+      setText(row.owned, owned);
       row.btn.classList.toggle("affordable", canAfford);
       row.btn.disabled = !canAfford;
       const { each, total, mult } = stats.perGen[id];
-      row.out.textContent =
-        owned > 0 ? `${fmt(total)}/s · ${fmt(each)} each` : `${fmt(each)}/s each`;
-      row.tier.textContent = mult > 1 ? fmtMult(mult) : "";
+      setText(row.out, owned > 0 ? `${fmt(total)}/s · ${fmt(each)} each` : `${fmt(each)}/s each`);
+      setText(row.tier, mult > 1 ? fmtMult(mult) : "");
     }
 
     const on = S.superconductorOn !== false;
@@ -289,8 +303,7 @@ export function initUI(handlers) {
     }
   }
 
-  function renderUpgrades(S, stats) {
-    const list = availableUpgrades(S);
+  function renderUpgrades(S, stats, list) {
     const sig = list.map((u) => u.id).join(",");
     if (sig !== upgradeSig) {
       upgradeSig = sig;
@@ -324,7 +337,7 @@ export function initUI(handlers) {
         span.title = `${upg.name} — ${describeEffects(upg.effects)}`;
         el.ownedList.appendChild(span);
       }
-      el.ownedCount.textContent = `(${S.upgrades.length})`;
+      setText(el.ownedCount, `(${S.upgrades.length})`);
     }
 
     let affordableCount = 0;
@@ -338,8 +351,7 @@ export function initUI(handlers) {
     // "Buy all" only counts what you can afford right now; the conductor will
     // pick up the rest as the cargo comes in.
     el.buyAllBtn.disabled = affordableCount === 0;
-    const buyAllLabel = affordableCount > 1 ? `Buy all (${affordableCount})` : "Buy all";
-    if (el.buyAllBtn.textContent !== buyAllLabel) el.buyAllBtn.textContent = buyAllLabel;
+    setText(el.buyAllBtn, affordableCount > 1 ? `Buy all (${affordableCount})` : "Buy all");
 
     const on = S.conductorOn !== false;
     el.conductorBtn.hidden = !stats.conductor;
@@ -385,73 +397,102 @@ export function initUI(handlers) {
       ["away progress", `${stats.offlineHours}h @ ${Math.round(stats.offlineRate * 100)}%`],
       ["railway founded", new Date(S.startedAt).toLocaleDateString()],
     ];
-    el.statgrid.innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    // The labels never change, so the grid is built once and only the values
+    // are written after that — reparsing twenty rows of HTML fifteen times a
+    // second to change a handful of numbers is a lot of work for nothing.
+    if (statCells.length !== rows.length) {
+      el.statgrid.textContent = "";
+      statCells.length = 0;
+      for (const [label] of rows) {
+        const wrap = document.createElement("div");
+        const dt = document.createElement("dt");
+        dt.textContent = label;
+        const dd = document.createElement("dd");
+        wrap.append(dt, dd);
+        el.statgrid.appendChild(wrap);
+        statCells.push(dd);
+      }
+    }
+    for (let i = 0; i < rows.length; i++) setText(statCells[i], rows[i][1]);
 
     const got = new Set(S.achievements);
     for (const [id, li] of achRows) li.classList.toggle("got", got.has(id));
-    el.achCount.textContent = `(${S.achievements.length}/${ACHIEVEMENTS.length})`;
+    setText(el.achCount, `(${S.achievements.length}/${ACHIEVEMENTS.length})`);
   }
 
-  function renderHeader(S, stats) {
-    el.cargo.textContent = fmt(S.cargo);
-    el.persec.textContent = fmt(stats.perSec);
-    el.buffHint.textContent = stats.buffMult > 1 ? `  ×${Math.round(stats.buffMult)}!` : "";
-    el.haulval.textContent = fmt(stats.haulValue);
+  function renderHeader(S, stats, available) {
+    setText(el.cargo, fmt(S.cargo));
+    setText(el.persec, fmt(stats.perSec));
+    setText(el.buffHint, stats.buffMult > 1 ? `  ×${Math.round(stats.buffMult)}!` : "");
+    setText(el.haulval, fmt(stats.haulValue));
     // What a haul is actually worth, in terms of the whole railway. Without
     // this it's impossible to tell whether hauling is still pulling its weight.
     if (stats.perSec > 0) {
       const seconds = stats.haulValue / stats.perSec;
-      el.haulCompare.textContent =
+      setText(
+        el.haulCompare,
         seconds >= 0.01
           ? `worth ${seconds < 10 ? seconds.toFixed(2) : fmt(seconds)}s of the whole network`
-          : "worth less than a hundredth of a second of the network";
+          : "worth less than a hundredth of a second of the network",
+      );
     } else {
-      el.haulCompare.textContent = "";
+      setText(el.haulCompare, "");
     }
-    el.qsRun.textContent = fmt(S.runEarned);
-    el.qsTotal.textContent = fmt(S.totalEarned);
-    el.qsHauls.textContent = fmt(S.hauls);
+    setText(el.qsRun, fmt(S.runEarned));
+    setText(el.qsTotal, fmt(S.totalEarned));
+    setText(el.qsHauls, fmt(S.hauls));
 
     const hasSpikes = S.totalSpikes > 0 || S.regauges > 0;
     el.spikeBadge.hidden = !hasSpikes;
     if (hasSpikes) {
-      el.spikeNum.textContent = fmt(S.spikes);
-      el.spikeBonus.textContent = fmtPct(stats.spikeBonus);
+      setText(el.spikeNum, fmt(S.spikes));
+      setText(el.spikeBonus, fmtPct(stats.spikeBonus));
     }
 
     if (S.buff) {
       const buff = BUFFS[S.buff.type];
       el.buffbar.hidden = false;
-      el.buffbar.innerHTML = `<span class="buff-chip">${buff.icon} ${buff.name} ${fmtClock(buffRemaining(S))}</span>`;
+      // Rebuilt only when the countdown ticks over, not on every render.
+      const html = `<span class="buff-chip">${buff.icon} ${buff.name} ${fmtClock(buffRemaining(S))}</span>`;
+      if (buffbarHtml !== html) {
+        buffbarHtml = html;
+        el.buffbar.innerHTML = html;
+      }
     } else if (!el.buffbar.hidden) {
       el.buffbar.hidden = true;
       el.buffbar.textContent = "";
+      buffbarHtml = null;
     }
 
     const gain = spikeGain(S);
-    el.regaugeGain.textContent = fmt(gain);
+    setText(el.regaugeGain, fmt(gain));
     el.regaugeBtn.disabled = gain < 1;
     const need = nextSpikeAt(S);
-    el.regaugeNext.textContent =
+    setText(
+      el.regaugeNext,
       gain >= 1
         ? `one more at ${fmt(need)} cargo moved all time`
-        : `first spike at ${fmt(need)} cargo moved all time (${fmt(S.totalEarned)} so far)`;
+        : `first spike at ${fmt(need)} cargo moved all time (${fmt(S.totalEarned)} so far)`,
+    );
 
-    el.pipUpgrades.hidden = !availableUpgrades(S).some((u) => u.cost <= S.cargo);
+    el.pipUpgrades.hidden = !available.some((u) => u.cost <= S.cargo);
     el.pipSpikes.hidden = !SPIKE_UPGRADES.some(
       (u) => !S.spikeUpgrades.includes(u.id) && S.spikes >= u.cost,
     );
-    el.bgBtn.textContent = `Background: ${S.bgOn ? "on" : "off"}`;
-    el.soundBtn.textContent = `Sound: ${S.soundOn ? "on" : "off"}`;
+    setText(el.bgBtn, `Background: ${S.bgOn ? "on" : "off"}`);
+    setText(el.soundBtn, `Sound: ${S.soundOn ? "on" : "off"}`);
     // No point in a viewing area with nothing to view.
     el.vista.hidden = !S.bgOn;
     el.vistaBtn.hidden = !S.bgOn;
   }
 
   function render(S, stats) {
-    renderHeader(S, stats);
+    // Walked once per render and shared: the header needs it for the "something
+    // is affordable" pip and the Works list needs it for the rows themselves.
+    const available = availableUpgrades(S);
+    renderHeader(S, stats, available);
     renderGens(S, stats);
-    renderUpgrades(S, stats);
+    renderUpgrades(S, stats, available);
     renderSpikes(S);
     // Only worth the work when it's actually unfolded.
     if (el.logbook.open) renderStats(S, stats);
