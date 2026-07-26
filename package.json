@@ -5,6 +5,8 @@
   "description": "An incremental game about starting with one handcar and ending up with a railway around the world.",
   "type": "module",
   "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
@@ -12,6 +14,7 @@
   },
   "devDependencies": {
     "oxfmt": "^0.60.0",
-    "oxlint": "^1.75.0"
+    "oxlint": "^1.75.0",
+    "vitest": "^4.1.10"
   }
 }

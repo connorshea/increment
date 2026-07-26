@@ -48,6 +48,30 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
+The game itself still ships with no dependencies and no build step — nothing in
+`node_modules` reaches the browser. The tooling below is for working on it.
+
+## Tests, linting and formatting
+
+```sh
+npm install       # dev tooling only
+npm test          # vitest, once
+npm run test:watch
+npm run lint      # oxlint  (--fix variant: npm run lint:fix)
+npm run fmt       # oxfmt   (--check variant: npm run fmt:check)
+```
+
+oxlint and oxfmt both run on their defaults, so there is no config file to keep
+in sync.
+
+The tests in `test/` cover the parts that decide whether a save is correct:
+number formatting, the engine (costs, multipliers, buying, regauging, parcels,
+away progress, milestones), the save shape (normalising an old or hand-edited
+save, export/import round-trips), and the integrity of the content in
+`js/data.js` — unique ids, a ladder that never goes backwards, and no effect
+aimed at a generator that does not exist. Rendering is not covered; `js/ui.js`
+and `js/background.js` are exercised by hand in a browser.
+
 ## Deploying
 
 `.github/workflows/deploy.yml` publishes the repository root to GitHub Pages on

@@ -19,8 +19,9 @@ export const BASE_HAUL = 1;
 
 /** Cost of buying `count` more of `gen` when you already own `owned`. */
 export function genCost(gen, owned, count = 1) {
+  if (count <= 0) return 0;
   const first = gen.base * Math.pow(COST_GROWTH, owned);
-  if (count <= 1) return first;
+  if (count === 1) return first;
   return (first * (Math.pow(COST_GROWTH, count) - 1)) / (COST_GROWTH - 1);
 }
 
