@@ -94,9 +94,9 @@ export function initUI(handlers) {
 
   el.loader.addEventListener('click', (ev) => handlers.onHaul(ev));
 
-  // Hold the loader down and it keeps working on its own, once every couple of
-  // seconds, so a long shift doesn't have to be a thousand separate clicks.
-  const HOLD_INTERVAL = 2000;
+  // Hold the loader down and it keeps working on its own, so a long shift
+  // doesn't have to be a thousand separate clicks.
+  const HOLD_INTERVAL = 750;
   let holdTimer = null;
   let holdAt = { clientX: 0, clientY: 0 };
 

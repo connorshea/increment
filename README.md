@@ -9,7 +9,7 @@ of ES modules.
 ## How it plays
 
 - **Load cargo by hand** to get your first few tonnes moving — or hold the
-  button down and it keeps working on its own, once every two seconds.
+  button down and it keeps working on its own, about once a second.
 - **Buy rolling stock** — handcars, steam shunters, freight wagons, all the way
   up to an orbital funicular — each of which moves cargo for you forever.
 - **Complete works** (upgrades) that double a line's output, make hauling by hand

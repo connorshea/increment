@@ -225,7 +225,8 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 }
 
 /* While held, a ring sweeps round the button and completes on each automatic
-   haul — two seconds of nothing happening otherwise reads as broken. */
+   haul, so the rhythm of the hold is visible. Keep this duration in step with
+   HOLD_INTERVAL in ui.js. */
 .loader-ring {
   position: absolute;
   inset: -5px;
@@ -245,7 +246,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   stroke-dashoffset: 295.3;
 }
 .loader.holding .loader-ring { opacity: 0.9; }
-.loader.holding .loader-ring circle { animation: hold-charge 2s linear infinite; }
+.loader.holding .loader-ring circle { animation: hold-charge 0.75s linear infinite; }
 
 .haul-value { margin: 0; font-size: 0.85rem; color: var(--ink-dim); }
 .haul-value strong { font-family: var(--mono); color: var(--accent); }
