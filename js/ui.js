@@ -100,10 +100,20 @@ export function initUI(handlers) {
   let holdTimer = null;
   let holdAt = { clientX: 0, clientY: 0 };
 
+  let holdPointer = null;
+
   function stopHold() {
     if (holdTimer !== null) {
       clearInterval(holdTimer);
       holdTimer = null;
+    }
+    if (holdPointer !== null) {
+      try {
+        el.loader.releasePointerCapture(holdPointer);
+      } catch {
+        // The pointer was already gone; nothing to release.
+      }
+      holdPointer = null;
     }
     el.loader.classList.remove('holding');
   }
@@ -112,11 +122,20 @@ export function initUI(handlers) {
     stopHold();
     holdAt = { clientX: ev.clientX, clientY: ev.clientY };
     el.loader.classList.add('holding');
+    // Capturing means a hand that drifts off the button mid-hold keeps
+    // working, and guarantees we still get the pointerup that ends it.
+    try {
+      el.loader.setPointerCapture(ev.pointerId);
+      holdPointer = ev.pointerId;
+    } catch {
+      holdPointer = null;
+    }
     holdTimer = setInterval(() => handlers.onHaul(holdAt), HOLD_INTERVAL);
   });
-  for (const evt of ['pointerup', 'pointerleave', 'pointercancel']) {
+  for (const evt of ['pointerup', 'pointercancel', 'lostpointercapture']) {
     el.loader.addEventListener(evt, stopHold);
   }
+  window.addEventListener('pointerup', stopHold); // belt and braces
   window.addEventListener('blur', stopHold);
   // A long press on a touchscreen shouldn't pop up the callout menu.
   el.loader.addEventListener('contextmenu', (ev) => ev.preventDefault());

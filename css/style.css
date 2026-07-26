@@ -224,11 +224,28 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   pointer-events: none;
 }
 
-/* While held, the ring charges up to each automatic haul. */
-.loader.holding .loader-glow {
-  animation: hold-charge 2s linear infinite;
-  border-color: rgba(233, 164, 75, 0.5);
+/* While held, a ring sweeps round the button and completes on each automatic
+   haul — two seconds of nothing happening otherwise reads as broken. */
+.loader-ring {
+  position: absolute;
+  inset: -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
+  transform: rotate(-90deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
+.loader-ring circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 295.3; /* 2 * pi * r, with r = 47 */
+  stroke-dashoffset: 295.3;
+}
+.loader.holding .loader-ring { opacity: 0.9; }
+.loader.holding .loader-ring circle { animation: hold-charge 2s linear infinite; }
 
 .haul-value { margin: 0; font-size: 0.85rem; color: var(--ink-dim); }
 .haul-value strong { font-family: var(--mono); color: var(--accent); }
@@ -587,9 +604,8 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 }
 @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 @keyframes hold-charge {
-  0% { opacity: 0.1; transform: scale(1); }
-  88% { opacity: 0.6; transform: scale(1.1); }
-  100% { opacity: 0; transform: scale(1.2); }
+  from { stroke-dashoffset: 295.3; }
+  to { stroke-dashoffset: 0; }
 }
 @keyframes jostle {
   0%, 100% { transform: translateY(0) rotate(-5deg); }

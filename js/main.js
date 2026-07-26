@@ -306,4 +306,5 @@ requestAnimationFrame(loop);
 
 if (S.totalEarned === 0) {
   ui.toast('Push the handcar. Everything starts there.');
+  ui.toast('Hold the button down and it keeps loading on its own.');
 }
