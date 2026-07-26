@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Railhead — an incremental game</title>
+<meta name="description" content="Railhead: start with one handcar and end up with a railway around the world. A cozy incremental game about moving cargo.">
+<meta name="theme-color" content="#0b0d12">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚂</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div id="parcel-layer" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">🚂</span>
+    <div>
+      <h1>Railhead</h1>
+      <p class="tagline">one handcar, then the whole world</p>
+    </div>
+  </div>
+
+  <div class="counter">
+    <div class="counter-main"><span id="cargo">0</span> <span class="unit">cargo</span></div>
+    <div class="counter-sub"><span id="persec">0</span> per second<span id="buff-hint"></span></div>
+    <div id="buffbar" class="buffbar" hidden></div>
+  </div>
+
+  <div class="spike-badge" id="spike-badge" hidden>
+    <span class="spike-count"><span id="spike-num">0</span> 🔩</span>
+    <span class="spike-label">golden spikes · <span id="spike-bonus">+0%</span></span>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="panel yard-panel">
+    <button id="loader" class="loader" aria-label="Load cargo by hand">
+      <span class="loader-glow"></span>
+      <span class="loader-icon">🚂</span>
+      <span class="loader-label">load</span>
+    </button>
+    <p class="haul-value">each haul: <strong id="haulval">1</strong></p>
+
+    <div class="quickstats">
+      <div><span class="qs-label">this line</span><span id="qs-run">0</span></div>
+      <div><span class="qs-label">all time</span><span id="qs-total">0</span></div>
+      <div><span class="qs-label">hauls</span><span id="qs-hauls">0</span></div>
+    </div>
+
+    <div class="regauge-box">
+      <h3>Regauge</h3>
+      <p class="regauge-copy">Tear the whole network up and lay it again properly. You lose this railway; you keep <strong>golden spikes</strong>, and every one makes all future railways faster, forever.</p>
+      <p class="regauge-gain">spikes waiting to be driven: <strong id="regauge-gain">0</strong> 🔩</p>
+      <button id="regauge-btn" class="btn danger" disabled>Regauge the line</button>
+      <p class="regauge-next" id="regauge-next"></p>
+    </div>
+  </section>
+
+  <section class="panel shop-panel">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="build" role="tab">Rolling stock</button>
+      <button class="tab" data-tab="upgrades" role="tab">Works <span class="pip" id="pip-upgrades" hidden></span></button>
+      <button class="tab" data-tab="spikes" role="tab">Spikes <span class="pip" id="pip-spikes" hidden></span></button>
+      <button class="tab" data-tab="stats" role="tab">Logbook</button>
+    </nav>
+
+    <div class="tabpanel active" data-panel="build">
+      <div class="buyamt" role="group" aria-label="Buy amount">
+        <span>buy</span>
+        <button class="amt active" data-amt="1">×1</button>
+        <button class="amt" data-amt="10">×10</button>
+        <button class="amt" data-amt="100">×100</button>
+        <button class="amt" data-amt="max">max</button>
+      </div>
+      <ul id="gen-list" class="gen-list"></ul>
+    </div>
+
+    <div class="tabpanel" data-panel="upgrades">
+      <ul id="upgrade-list" class="upgrade-list"></ul>
+      <p class="empty" id="upgrade-empty">Nothing new on the drawing board. Keep the trains running.</p>
+      <div class="owned-strip">
+        <h4>Completed works <span id="owned-count">(0)</span></h4>
+        <div id="owned-list" class="owned-list"></div>
+      </div>
+    </div>
+
+    <div class="tabpanel" data-panel="spikes">
+      <p class="spike-intro">Golden spikes are earned by regauging. They are spent here — but every spike you have <em>ever</em> driven keeps the whole railway running faster.</p>
+      <ul id="spike-list" class="upgrade-list"></ul>
+    </div>
+
+    <div class="tabpanel" data-panel="stats">
+      <dl class="statgrid" id="statgrid"></dl>
+      <h4 class="ach-head">Milestones <span id="ach-count">(0)</span> <small>each grants +1% to everything</small></h4>
+      <ul id="ach-list" class="ach-list"></ul>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <button class="btn ghost" id="save-btn">Save</button>
+  <button class="btn ghost" id="export-btn">Export</button>
+  <button class="btn ghost" id="import-btn">Import</button>
+  <button class="btn ghost" id="bg-btn">Background: on</button>
+  <button class="btn ghost danger-text" id="wipe-btn">Wipe save</button>
+  <span class="footer-note">saves to this browser · <span id="save-status">idle</span></span>
+</footer>
+
+<div id="toast-layer" class="toast-layer" aria-live="polite"></div>
+
+<dialog id="modal" class="modal">
+  <h3 id="modal-title">Export save</h3>
+  <p id="modal-copy"></p>
+  <textarea id="modal-text" spellcheck="false" rows="6"></textarea>
+  <menu>
+    <button class="btn ghost" id="modal-cancel">Close</button>
+    <button class="btn" id="modal-ok" hidden>Load it</button>
+  </menu>
+</dialog>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
