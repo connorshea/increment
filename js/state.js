@@ -41,7 +41,7 @@ export function freshState(carry = {}) {
 export function normalize(raw) {
   const base = freshState();
   const S = { ...base, ...raw };
-  S.gens = { ...base.gens, ...(raw.gens || {}) };
+  S.gens = { ...base.gens, ...raw.gens };
   for (const key of ['upgrades', 'spikeUpgrades', 'achievements', 'seenGens']) {
     if (!Array.isArray(S[key])) S[key] = [];
   }

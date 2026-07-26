@@ -1,0 +1,17 @@
+{
+  "name": "railhead",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An incremental game about starting with one handcar and ending up with a railway around the world.",
+  "type": "module",
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.60.0",
+    "oxlint": "^1.75.0"
+  }
+}
