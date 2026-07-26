@@ -10,9 +10,10 @@
 // moves. Regauging reseeds the layout, so each railway looks like its own place.
 
 const TAU = Math.PI * 2;
-const MAX_STATIONS = 46;
-const LINE_COUNT = 6;
-const BUILD_SPEED = 170; // px/sec that new track lays itself down
+const MAX_STATIONS = 40;
+const MAX_CHAIN = 13;
+const LINE_COUNT = 7;
+const BUILD_SPEED = 340; // px/sec that new track lays itself down
 const CAR = 10;
 const CAR_GAP = 2.6;
 const MAX_CARGO = 5;
@@ -146,7 +147,7 @@ export function createBackground(canvas) {
    * Chains always step to a station further out than the last, so a line's
    * revealed prefix is exactly the part of it near the centre.
    */
-  function buildLine(stations, rng, startIndex, colorIndex) {
+  function growChain(stations, rng, startIndex) {
     const chain = [startIndex];
     const wanted = 6 + Math.floor(rng() * 6);
     let heading = null;
@@ -185,7 +186,77 @@ export function createBackground(canvas) {
 
     if (chain.length < 2) return null;
     for (const i of chain) stations[i].lines++;
+    return chain;
+  }
 
+  /**
+   * Nothing is left stranded: any station no line reached gets attached to the
+   * nearest route that can still take it. Chains stay index-monotonic — a
+   * station is only ever appended after one closer to the centre, or spliced
+   * between two that bracket it — so the reveal order still radiates outward.
+   */
+  function connectOrphans(stations, chains) {
+    if (!chains.length) return;
+    for (let idx = 0; idx < stations.length; idx++) {
+      if (stations[idx].lines > 0) continue;
+      const target = stations[idx];
+
+      // Nearest free end wins, but a route that has already swallowed a lot is
+      // penalised — otherwise the first long line keeps being the nearest and
+      // ends up absorbing every leftover on the map.
+      let bestChain = null;
+      let bestScore = Infinity;
+      for (const chain of chains) {
+        const end = stations[chain[chain.length - 1]];
+        if (chain[chain.length - 1] >= idx) continue;
+        if (chain.length >= MAX_CHAIN) continue;
+        const score = Math.hypot(end.x - target.x, end.y - target.y) + chain.length * 26;
+        if (score < bestScore) {
+          bestScore = score;
+          bestChain = chain;
+        }
+      }
+      if (bestChain) {
+        bestChain.push(idx);
+        stations[idx].lines++;
+        continue;
+      }
+
+      // Otherwise splice it into a chain that steps straight over it.
+      let placed = false;
+      for (const chain of chains) {
+        for (let k = 1; k < chain.length && !placed; k++) {
+          if (chain[k - 1] < idx && chain[k] > idx) {
+            chain.splice(k, 0, idx);
+            stations[idx].lines++;
+            placed = true;
+          }
+        }
+        if (placed) break;
+      }
+      if (placed) continue;
+
+      // More central than every line's starting point, so neither of the above
+      // can reach it: put it on the front of the nearest chain instead.
+      let bestFront = null;
+      let frontDistance = Infinity;
+      for (const chain of chains) {
+        if (chain[0] <= idx) continue;
+        const head = stations[chain[0]];
+        const d = Math.hypot(head.x - target.x, head.y - target.y);
+        if (d < frontDistance) {
+          frontDistance = d;
+          bestFront = chain;
+        }
+      }
+      if (bestFront) {
+        bestFront.unshift(idx);
+        stations[idx].lines++;
+      }
+    }
+  }
+
+  function finishLine(stations, rng, chain, colorIndex) {
     // Flatten the chain into a polyline, remembering where each station sits
     // along it so growth can stop cleanly at a station.
     const points = [{ x: stations[chain[0]].x, y: stations[chain[0]].y }];
@@ -218,16 +289,19 @@ export function createBackground(canvas) {
     const rng = mulberry32(seed);
     const cell = Math.max(38, Math.min(width, height) / 13);
     const stations = placeStations(rng, cell);
-    const lines = [];
+    const chains = [];
 
     for (let i = 0; i < LINE_COUNT; i++) {
       // Every line leaves from the middle of the map, so the network radiates
       // outward instead of appearing as unconnected stubs on the edges.
       const start = Math.min(stations.length - 2, Math.floor(rng() * 5));
       if (start < 0) break;
-      const line = buildLine(stations, rng, start, i);
-      if (line) lines.push(line);
+      const chain = growChain(stations, rng, start);
+      if (chain) chains.push(chain);
     }
+
+    connectOrphans(stations, chains);
+    const lines = chains.map((chain, i) => finishLine(stations, rng, chain, i));
 
     net = { stations, lines, cell };
   }
