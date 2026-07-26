@@ -244,7 +244,13 @@ function loop(now) {
     lastRender = now;
     ui.render(S, stats);
     const busyness = Math.log10(1 + stats.perSec) / 12;
-    background.update(busyness, S.regauges);
+    // The map reaches further the more you have actually built.
+    const stock = Object.values(S.gens).reduce((a, b) => a + b, 0);
+    background.update({
+      growth: S.upgrades.length + Math.min(14, stock / 4),
+      busy: busyness,
+      regauges: S.regauges,
+    });
     audio.setIntensity(busyness);
   }
 

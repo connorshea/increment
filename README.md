@@ -64,7 +64,7 @@ also trigger a deploy by hand from the Actions tab.
 | `js/state.js`       | Save shape, `localStorage`, export/import                  |
 | `js/ui.js`          | DOM rendering                                              |
 | `js/audio.js`       | Web Audio synthesis: ambience, horns, and interface sounds  |
-| `js/background.js`  | The rail network that draws itself behind the page         |
+| `js/background.js`  | The freight map that builds itself behind the page          |
 | `js/main.js`        | Wiring and the game loop                                   |
 | `js/format.js`      | Number and time formatting                                 |
 
