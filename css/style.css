@@ -88,7 +88,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   align-items: center;
   gap: 1rem 1.5rem;
   padding: 1.1rem clamp(0.9rem, 3vw, 2.2rem) 0.4rem;
-  max-width: 1180px;
+  max-width: 1560px;
   margin: 0 auto;
 }
 
@@ -146,7 +146,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 .layout {
   position: relative;
   z-index: 2;
-  max-width: 1180px;
+  max-width: 1560px;
   margin: 0 auto;
   padding: 0.8rem clamp(0.9rem, 3vw, 2.2rem);
   display: grid;
@@ -317,6 +317,73 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 .btn.danger:hover:not(:disabled) { background: rgba(127, 182, 232, 0.24); }
 .danger-text { color: var(--danger) !important; }
 
+/* ---------- the three shops, side by side ---------- */
+
+.shops {
+  display: grid;
+  /* auto-fit collapses to two columns, then one, as the space runs out. */
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1.2rem;
+  align-items: start;
+}
+
+.shop { min-width: 0; }
+
+.shop-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.7rem;
+}
+.shop-head h2 {
+  font-size: 1rem;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+
+/* Each shop scrolls in its own right, so all three stay on screen together. */
+.shop-list {
+  max-height: min(64vh, 660px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.3rem;
+}
+.shop-list::-webkit-scrollbar { width: 8px; }
+.shop-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+.shop-list::-webkit-scrollbar-track { background: transparent; }
+.shop-list { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.16) transparent; }
+
+.logbook {
+  margin-top: 1.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.7rem;
+}
+.logbook > summary {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--ink-dim);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.logbook > summary::-webkit-details-marker { display: none; }
+.logbook > summary::before {
+  content: '▸';
+  color: var(--accent);
+  transition: transform 0.15s ease;
+}
+.logbook[open] > summary::before { transform: rotate(90deg); }
+.logbook > summary:hover { color: var(--ink); }
+.logbook .statgrid { margin-top: 0.8rem; }
+
 /* ---------- tabs ---------- */
 
 .tabs {
@@ -356,7 +423,6 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  margin-bottom: 0.7rem;
   font-size: 0.78rem;
   color: var(--ink-faint);
 }
@@ -510,7 +576,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 .footer {
   position: relative;
   z-index: 2;
-  max-width: 1180px;
+  max-width: 1560px;
   margin: 0.6rem auto 0;
   padding: 0.4rem clamp(0.9rem, 3vw, 2.2rem) 1.4rem;
   display: flex;

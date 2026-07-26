@@ -46,10 +46,10 @@ export function initUI(handlers) {
     parcelLayer: $('#parcel-layer'),
     toastLayer: $('#toast-layer'),
     loader: $('#loader'),
+    logbook: $('#logbook'),
   };
 
   let buyAmount = 1;
-  let activeTab = 'build';
   let upgradeSig = '';
   let genSig = '';
   const genRows = new Map();
@@ -140,16 +140,9 @@ export function initUI(handlers) {
   // A long press on a touchscreen shouldn't pop up the callout menu.
   el.loader.addEventListener('contextmenu', (ev) => ev.preventDefault());
 
-  document.querySelectorAll('.tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      activeTab = tab.dataset.tab;
-      document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t === tab));
-      document.querySelectorAll('.tabpanel').forEach((p) => {
-        p.classList.toggle('active', p.dataset.panel === activeTab);
-      });
-      handlers.onTabChange?.(activeTab);
-    });
-  });
+  // The logbook is long and mostly for reading, so it stays folded away; the
+  // three shops are always on screen together.
+  el.logbook.addEventListener('toggle', () => handlers.onTabChange?.(el.logbook.open));
 
   document.querySelectorAll('.amt').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -404,10 +397,11 @@ export function initUI(handlers) {
 
   function render(S, stats) {
     renderHeader(S, stats);
-    if (activeTab === 'build') renderGens(S, stats);
-    else if (activeTab === 'upgrades') renderUpgrades(S);
-    else if (activeTab === 'spikes') renderSpikes(S);
-    else if (activeTab === 'stats') renderStats(S, stats);
+    renderGens(S, stats);
+    renderUpgrades(S);
+    renderSpikes(S);
+    // Only worth the work when it's actually unfolded.
+    if (el.logbook.open) renderStats(S, stats);
   }
 
   // ---- effects ------------------------------------------------------------
@@ -484,7 +478,6 @@ export function initUI(handlers) {
   return {
     render, toast, floatNumber, pressLoader, spawnParcel, setSaveStatus,
     forceRefreshLists,
-    getActiveTab: () => activeTab,
     getBuyAmount: () => buyAmount,
   };
 }

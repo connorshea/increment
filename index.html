@@ -64,43 +64,47 @@
   </section>
 
   <section class="panel shop-panel">
-    <nav class="tabs" role="tablist">
-      <button class="tab active" data-tab="build" role="tab">Rolling stock</button>
-      <button class="tab" data-tab="upgrades" role="tab">Works <span class="pip" id="pip-upgrades" hidden></span></button>
-      <button class="tab" data-tab="spikes" role="tab">Spikes <span class="pip" id="pip-spikes" hidden></span></button>
-      <button class="tab" data-tab="stats" role="tab">Logbook</button>
-    </nav>
+    <div class="shops">
+      <section class="shop">
+        <header class="shop-head">
+          <h2>Rolling stock</h2>
+          <div class="buyamt" role="group" aria-label="Buy amount">
+            <button class="amt active" data-amt="1">×1</button>
+            <button class="amt" data-amt="10">×10</button>
+            <button class="amt" data-amt="100">×100</button>
+            <button class="amt" data-amt="max">max</button>
+          </div>
+        </header>
+        <ul id="gen-list" class="gen-list shop-list"></ul>
+      </section>
 
-    <div class="tabpanel active" data-panel="build">
-      <div class="buyamt" role="group" aria-label="Buy amount">
-        <span>buy</span>
-        <button class="amt active" data-amt="1">×1</button>
-        <button class="amt" data-amt="10">×10</button>
-        <button class="amt" data-amt="100">×100</button>
-        <button class="amt" data-amt="max">max</button>
-      </div>
-      <ul id="gen-list" class="gen-list"></ul>
+      <section class="shop">
+        <header class="shop-head">
+          <h2>Works <span class="pip" id="pip-upgrades" hidden></span></h2>
+        </header>
+        <ul id="upgrade-list" class="upgrade-list shop-list"></ul>
+        <p class="empty" id="upgrade-empty">Nothing new on the drawing board. Keep the trains running.</p>
+        <div class="owned-strip">
+          <h4>Completed works <span id="owned-count">(0)</span></h4>
+          <div id="owned-list" class="owned-list"></div>
+        </div>
+      </section>
+
+      <section class="shop">
+        <header class="shop-head">
+          <h2>Spikes <span class="pip" id="pip-spikes" hidden></span></h2>
+        </header>
+        <p class="spike-intro">Earned by regauging, and spent here — but every spike you have <em>ever</em> driven keeps the whole railway running faster.</p>
+        <ul id="spike-list" class="upgrade-list shop-list"></ul>
+      </section>
     </div>
 
-    <div class="tabpanel" data-panel="upgrades">
-      <ul id="upgrade-list" class="upgrade-list"></ul>
-      <p class="empty" id="upgrade-empty">Nothing new on the drawing board. Keep the trains running.</p>
-      <div class="owned-strip">
-        <h4>Completed works <span id="owned-count">(0)</span></h4>
-        <div id="owned-list" class="owned-list"></div>
-      </div>
-    </div>
-
-    <div class="tabpanel" data-panel="spikes">
-      <p class="spike-intro">Golden spikes are earned by regauging. They are spent here — but every spike you have <em>ever</em> driven keeps the whole railway running faster.</p>
-      <ul id="spike-list" class="upgrade-list"></ul>
-    </div>
-
-    <div class="tabpanel" data-panel="stats">
+    <details class="logbook" id="logbook">
+      <summary>Logbook</summary>
       <dl class="statgrid" id="statgrid"></dl>
       <h4 class="ach-head">Milestones <span id="ach-count">(0)</span> <small>each grants +1% to everything</small></h4>
       <ul id="ach-list" class="ach-list"></ul>
-    </div>
+    </details>
   </section>
 </main>
 
