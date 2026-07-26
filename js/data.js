@@ -494,6 +494,14 @@ export const SPIKE_UPGRADES = [
     effects: [{ k: "headStart", cargo: 10_000, gens: { handcar: 15 } }],
   },
   {
+    id: "sp_conductor",
+    name: "The Conductor",
+    icon: "🎩",
+    cost: 5,
+    desc: "Hires a conductor who signs off works for you, cheapest first, as you can afford them.",
+    effects: [{ k: "conductor" }],
+  },
+  {
     id: "sp_night",
     name: "Night Shift",
     icon: "🌙",

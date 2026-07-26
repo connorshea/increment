@@ -14,6 +14,9 @@ of ES modules.
   up to an orbital funicular — each of which moves cargo for you forever.
 - **Complete works** (upgrades) that double a line's output, make hauling by hand
   worth a share of your whole network, or link one class of stock to another.
+- **Hire the Conductor 🎩** (a spike upgrade) and works get signed off for you,
+  cheapest first, one every second and a half. There is a toggle in the Works
+  header to stand them down again, and a **Buy all** button for doing it by hand.
 - **Catch express parcels 📦** that drift across the screen for a temporary
   Full Steam, Rush Hour, or an instant windfall.
 - **Regauge** when you have moved enough cargo: you tear up the network and lay

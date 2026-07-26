@@ -34,6 +34,7 @@ export function freshState(carry = {}) {
     lastSaved: now,
     bgOn: carry.bgOn ?? true,
     soundOn: carry.soundOn ?? true,
+    conductorOn: carry.conductorOn ?? true,
   };
 }
 

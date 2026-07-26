@@ -81,6 +81,7 @@ export function computeStats(S) {
   let offlineHours = 8;
   let offlineRate = 0.5;
   let headStart = null;
+  let conductor = false;
   const synergies = [];
 
   const effects = [];
@@ -122,6 +123,9 @@ export function computeStats(S) {
         break;
       case "headStart":
         headStart = e;
+        break;
+      case "conductor":
+        conductor = true;
         break;
       default:
         break;
@@ -167,7 +171,32 @@ export function computeStats(S) {
     offlineHours,
     offlineRate,
     headStart,
+    conductor,
   };
+}
+
+/** Buys every work you can currently afford, cheapest first. Returns the count. */
+export function buyAllUpgrades(S) {
+  let bought = 0;
+  // Each pass removes one from the pool, so this always terminates.
+  for (;;) {
+    const next = availableUpgrades(S)[0];
+    if (!next || next.cost > S.cargo || !buyUpgrade(S, next.id)) break;
+    bought += 1;
+  }
+  return bought;
+}
+
+/**
+ * The Conductor signs off one work per call, cheapest first — the same order a
+ * player buying by hand would use, and slow enough that you can still outbid
+ * them for a generator if you want to.
+ */
+export function conductorBuy(S, stats) {
+  if (!stats.conductor || S.conductorOn === false) return null;
+  const next = availableUpgrades(S)[0]; // already sorted cheapest-first
+  if (!next || next.cost > S.cargo) return null;
+  return buyUpgrade(S, next.id) ? next : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -254,6 +283,7 @@ export function doRegauge(S, freshState) {
     seenGens: S.seenGens,
     bgOn: S.bgOn,
     soundOn: S.soundOn,
+    conductorOn: S.conductorOn,
   });
 
   // Advance Funding opens the new railway with something already running.

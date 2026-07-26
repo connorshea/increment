@@ -2,11 +2,13 @@ import { BUFFS } from "./data.js";
 import {
   applyBuff,
   applyOffline,
+  buyAllUpgrades,
   buyGenerator,
   buySpikeUpgrade,
   buyUpgrade,
   checkAchievements,
   computeStats,
+  conductorBuy,
   doRegauge,
   haul,
   nextParcelDelay,
@@ -24,6 +26,7 @@ import { initUI } from "./ui.js";
 const AUTOSAVE_MS = 20_000;
 const RENDER_MS = 66; // ~15fps for the DOM; the simulation itself runs every frame
 const PARCELS_AFTER = 500; // no express parcels until the railway is actually moving
+const CONDUCTOR_MS = 1500; // how often the conductor signs off one more work
 
 let S = load() || freshState();
 refreshVisibleGens(S);
@@ -61,6 +64,23 @@ const ui = initUI({
       ui.forceRefreshLists();
       refresh();
     }
+  },
+  onBuyAllUpgrades: () => {
+    const n = buyAllUpgrades(S);
+    if (n > 0) {
+      audio.sfx("buy");
+      ui.forceRefreshLists();
+      refresh();
+      ui.toast(`${n} work${n === 1 ? "" : "s"} signed off.`);
+    }
+  },
+  onToggleConductor: () => {
+    S.conductorOn = S.conductorOn === false;
+    ui.toast(
+      S.conductorOn
+        ? "🎩 The conductor is back on the platform."
+        : "🎩 The conductor stands down. Works are yours to buy.",
+    );
   },
   onBuySpike: (id) => {
     if (buySpikeUpgrade(S, id)) {
@@ -235,6 +255,7 @@ function refresh() {
 let lastFrame = performance.now();
 let lastRender = 0;
 let lastSaveAt = performance.now();
+let lastConductorAt = performance.now();
 
 function loop(now) {
   const dt = Math.min((now - lastFrame) / 1000, 1);
@@ -248,6 +269,17 @@ function loop(now) {
     stats = computeStats(S);
     audio.sfx("milestone");
     for (const ach of unlocked) ui.toast(`${ach.icon} Milestone: ${ach.name}`);
+  }
+
+  if (now - lastConductorAt > CONDUCTOR_MS) {
+    lastConductorAt = now;
+    const signed = conductorBuy(S, stats);
+    if (signed) {
+      audio.sfx("buy");
+      ui.forceRefreshLists();
+      refresh();
+      ui.toast(`🎩 ${signed.icon} ${signed.name} — signed off by the conductor.`);
+    }
   }
 
   maybeSpawnParcel(Date.now());

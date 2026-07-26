@@ -607,6 +607,45 @@ h4 {
   background: rgba(233, 164, 75, 0.1);
 }
 
+/* Buy-all and the conductor toggle, in the Works header. */
+.shop-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  color: var(--ink-dim);
+  border-radius: 7px;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+.chip:hover:not(:disabled) {
+  border-color: rgba(233, 164, 75, 0.45);
+  color: var(--accent);
+}
+.chip:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+.conductor-chip {
+  border-color: rgba(233, 164, 75, 0.4);
+  color: var(--accent);
+}
+.conductor-chip.off {
+  border-color: transparent;
+  color: var(--ink-faint);
+}
+.conductor-chip.off .emoji {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
 /* ---------- rolling stock ---------- */
 
 .gen-list,

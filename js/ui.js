@@ -46,6 +46,8 @@ export function initUI(handlers) {
     regaugeBtn: $("#regauge-btn"),
     regaugeNext: $("#regauge-next"),
     pipUpgrades: $("#pip-upgrades"),
+    buyAllBtn: $("#buy-all-btn"),
+    conductorBtn: $("#conductor-btn"),
     pipSpikes: $("#pip-spikes"),
     saveStatus: $("#save-status"),
     bgBtn: $("#bg-btn"),
@@ -65,6 +67,7 @@ export function initUI(handlers) {
   // stranding the last row on screen after you buy it.
   let upgradeSig = null;
   let genSig = null;
+  let conductorShown = null;
   const genRows = new Map();
   const spikeRows = new Map();
   const achRows = new Map();
@@ -169,6 +172,8 @@ export function initUI(handlers) {
   $("#wipe-btn").addEventListener("click", () => handlers.onWipe());
   $("#export-btn").addEventListener("click", () => handlers.onExport());
   $("#import-btn").addEventListener("click", () => handlers.onImport());
+  el.buyAllBtn.addEventListener("click", () => handlers.onBuyAllUpgrades());
+  el.conductorBtn.addEventListener("click", () => handlers.onToggleConductor());
   el.bgBtn.addEventListener("click", () => handlers.onToggleBg());
   el.soundBtn.addEventListener("click", () => handlers.onToggleSound());
   el.vistaBtn.addEventListener("click", () => {
@@ -269,7 +274,7 @@ export function initUI(handlers) {
     }
   }
 
-  function renderUpgrades(S) {
+  function renderUpgrades(S, stats) {
     const list = availableUpgrades(S);
     const sig = list.map((u) => u.id).join(",");
     if (sig !== upgradeSig) {
@@ -307,10 +312,27 @@ export function initUI(handlers) {
       el.ownedCount.textContent = `(${S.upgrades.length})`;
     }
 
+    let affordableCount = 0;
     for (const btn of el.upgradeList.querySelectorAll(".upg")) {
       const affordable = Number(btn.dataset.cost) <= S.cargo;
+      if (affordable) affordableCount += 1;
       btn.classList.toggle("affordable", affordable);
       btn.disabled = !affordable;
+    }
+
+    // "Buy all" only counts what you can afford right now; the conductor will
+    // pick up the rest as the cargo comes in.
+    el.buyAllBtn.disabled = affordableCount === 0;
+    const buyAllLabel = affordableCount > 1 ? `Buy all (${affordableCount})` : "Buy all";
+    if (el.buyAllBtn.textContent !== buyAllLabel) el.buyAllBtn.textContent = buyAllLabel;
+
+    const on = S.conductorOn !== false;
+    el.conductorBtn.hidden = !stats.conductor;
+    el.conductorBtn.classList.toggle("off", !on);
+    // Rewriting this every frame would churn the DOM for nothing.
+    if (conductorShown !== on) {
+      conductorShown = on;
+      el.conductorBtn.innerHTML = `<span class="emoji">🎩</span> Conductor: ${on ? "on" : "off"}`;
     }
   }
 
@@ -414,7 +436,7 @@ export function initUI(handlers) {
   function render(S, stats) {
     renderHeader(S, stats);
     renderGens(S, stats);
-    renderUpgrades(S);
+    renderUpgrades(S, stats);
     renderSpikes(S);
     // Only worth the work when it's actually unfolded.
     if (el.logbook.open) renderStats(S, stats);
@@ -531,6 +553,8 @@ export function describeEffects(effects) {
           return `away progress: ${e.hours}h cap at ${Math.round(e.rate * 100)}%`;
         case "headStart":
           return `open each line with ${fmt(e.cargo)} cargo`;
+        case "conductor":
+          return "works are bought for you, cheapest first";
         default:
           return "";
       }
