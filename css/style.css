@@ -80,16 +80,36 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 
 /* ---------- top bar ---------- */
 
+/* The counter stays put while the rest of the page scrolls under it. The
+   ::before stretches the backing to the full viewport width, since the bar
+   itself is centred and capped. */
 .topbar {
-  position: relative;
-  z-index: 2;
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 1rem 1.5rem;
-  padding: 1.1rem clamp(0.9rem, 3vw, 2.2rem) 0.4rem;
+  padding: 1.1rem clamp(0.9rem, 3vw, 2.2rem) 0.9rem;
   max-width: 1560px;
   margin: 0 auto;
+}
+
+.topbar::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(-50vw + 50%);
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 10, 14, 0.97) 0%,
+    rgba(8, 10, 14, 0.93) 68%,
+    rgba(8, 10, 14, 0) 100%
+  );
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .brand { display: flex; align-items: center; gap: 0.7rem; }
