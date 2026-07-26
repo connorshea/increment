@@ -55,6 +55,7 @@ describe("freshState", () => {
       hauls: 300,
       soundOn: false,
       conductorOn: false,
+      superconductorOn: false,
       cargo: 5000, // not a carried field — must be ignored
       upgrades: ["shovel"],
     });
@@ -63,6 +64,7 @@ describe("freshState", () => {
     expect(S.regauges).toBe(2);
     expect(S.soundOn).toBe(false);
     expect(S.conductorOn).toBe(false);
+    expect(S.superconductorOn).toBe(false);
     expect(S.cargo).toBe(0);
     expect(S.upgrades).toEqual([]);
   });
@@ -72,6 +74,7 @@ describe("freshState", () => {
     expect(S.bgOn).toBe(true);
     expect(S.soundOn).toBe(true);
     expect(S.conductorOn).toBe(true);
+    expect(S.superconductorOn).toBe(true);
   });
 });
 
@@ -83,6 +86,7 @@ describe("normalize", () => {
     expect(S.cargo).toBe(500);
     expect(S.upgrades).toEqual([]);
     expect(S.conductorOn).toBe(true);
+    expect(S.superconductorOn).toBe(true);
     expect(S.gens.handcar).toBe(0);
   });
 

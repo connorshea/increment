@@ -560,6 +560,16 @@ export const SPIKE_UPGRADES = [
     desc: "Everything runs 4× faster. There is nowhere left the line does not go.",
     effects: [{ k: "all", mult: 4 }],
   },
+  {
+    id: "sp_superconductor",
+    name: "The Superconductor",
+    icon: "❄️",
+    cost: 250,
+    desc:
+      "Orders the best rolling stock on the roster in bulk, and never spends more " +
+      "than half the cargo in hand at once.",
+    effects: [{ k: "superconductor" }],
+  },
 ];
 
 export const SPIKE_BY_ID = Object.fromEntries(SPIKE_UPGRADES.map((u) => [u.id, u]));

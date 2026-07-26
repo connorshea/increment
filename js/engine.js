@@ -83,6 +83,7 @@ export function computeStats(S) {
   let offlineRate = 0.5;
   let headStart = null;
   let conductor = false;
+  let superconductor = false;
   const synergies = [];
 
   const effects = [];
@@ -127,6 +128,9 @@ export function computeStats(S) {
         break;
       case "conductor":
         conductor = true;
+        break;
+      case "superconductor":
+        superconductor = true;
         break;
       default:
         break;
@@ -173,6 +177,7 @@ export function computeStats(S) {
     offlineRate,
     headStart,
     conductor,
+    superconductor,
   };
 }
 
@@ -198,6 +203,29 @@ export function conductorBuy(S, stats) {
   const next = availableUpgrades(S)[0]; // already sorted cheapest-first
   if (!next || next.cost > S.cargo) return null;
   return buyUpgrade(S, next.id) ? next : null;
+}
+
+/** The most of your cargo the Superconductor will commit to one order. */
+export const SUPERCONDUCTOR_BUDGET = 0.5;
+
+/**
+ * The Superconductor orders the best rolling stock on the roster, as much of it
+ * as half the cargo in hand will cover. Capping the order at half means it can
+ * never strip the yard bare — there is always something left for works, and for
+ * the regauge you might be saving towards.
+ *
+ * Returns { gen, count } when it buys, or null when the top tier is still out
+ * of reach on that budget. Deliberately no falling back down the ladder: at the
+ * top tier it is worth waiting a moment rather than spending on lesser stock.
+ */
+export function superconductorBuy(S, stats) {
+  if (!stats.superconductor || S.superconductorOn === false) return null;
+  const gen = GEN_BY_ID[S.seenGens[S.seenGens.length - 1]];
+  if (!gen) return null;
+  const owned = S.gens[gen.id] || 0;
+  const count = maxAffordable(gen, owned, S.cargo * SUPERCONDUCTOR_BUDGET);
+  if (count < 1) return null;
+  return buyGenerator(S, gen.id, count) > 0 ? { gen, count } : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -285,6 +313,7 @@ export function doRegauge(S, freshState) {
     bgOn: S.bgOn,
     soundOn: S.soundOn,
     conductorOn: S.conductorOn,
+    superconductorOn: S.superconductorOn,
   });
 
   // Advance Funding opens the new railway with something already running.

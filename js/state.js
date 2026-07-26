@@ -35,6 +35,7 @@ export function freshState(carry = {}) {
     bgOn: carry.bgOn ?? true,
     soundOn: carry.soundOn ?? true,
     conductorOn: carry.conductorOn ?? true,
+    superconductorOn: carry.superconductorOn ?? true,
   };
 }
 

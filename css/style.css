@@ -607,7 +607,7 @@ h4 {
   background: rgba(233, 164, 75, 0.1);
 }
 
-/* Buy-all and the conductor toggle, in the Works header. */
+/* Buy-all, and the two automation toggles, in the shop headers. */
 .shop-tools {
   display: flex;
   align-items: center;
@@ -633,15 +633,15 @@ h4 {
   cursor: default;
   opacity: 0.4;
 }
-.conductor-chip {
+.auto-chip {
   border-color: rgba(233, 164, 75, 0.4);
   color: var(--accent);
 }
-.conductor-chip.off {
+.auto-chip.off {
   border-color: transparent;
   color: var(--ink-faint);
 }
-.conductor-chip.off .emoji {
+.auto-chip.off .emoji {
   filter: grayscale(1);
   opacity: 0.6;
 }

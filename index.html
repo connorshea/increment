@@ -88,11 +88,16 @@
           <section class="shop">
             <header class="shop-head">
               <h2>Rolling stock</h2>
-              <div class="buyamt" role="group" aria-label="Buy amount">
-                <button class="amt active" data-amt="1">×1</button>
-                <button class="amt" data-amt="10">×10</button>
-                <button class="amt" data-amt="100">×100</button>
-                <button class="amt" data-amt="max">max</button>
+              <div class="shop-tools">
+                <button class="chip auto-chip" id="super-btn" hidden>
+                  <span class="emoji">❄️</span> Superconductor: on
+                </button>
+                <div class="buyamt" role="group" aria-label="Buy amount">
+                  <button class="amt active" data-amt="1">×1</button>
+                  <button class="amt" data-amt="10">×10</button>
+                  <button class="amt" data-amt="100">×100</button>
+                  <button class="amt" data-amt="max">max</button>
+                </div>
               </div>
             </header>
             <ul id="gen-list" class="gen-list shop-list"></ul>
@@ -103,7 +108,7 @@
               <h2>Works <span class="pip" id="pip-upgrades" hidden></span></h2>
               <div class="shop-tools">
                 <button class="chip" id="buy-all-btn" disabled>Buy all</button>
-                <button class="chip conductor-chip" id="conductor-btn" hidden>
+                <button class="chip auto-chip" id="conductor-btn" hidden>
                   <span class="emoji">🎩</span> Conductor: on
                 </button>
               </div>

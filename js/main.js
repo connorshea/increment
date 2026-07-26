@@ -15,6 +15,7 @@ import {
   parcelLifetime,
   refreshVisibleGens,
   rollBuff,
+  superconductorBuy,
   tick,
 } from "./engine.js";
 import { fmt, fmtTime } from "./format.js";
@@ -27,6 +28,7 @@ const AUTOSAVE_MS = 20_000;
 const RENDER_MS = 66; // ~15fps for the DOM; the simulation itself runs every frame
 const PARCELS_AFTER = 500; // no express parcels until the railway is actually moving
 const CONDUCTOR_MS = 1500; // how often the conductor signs off one more work
+const SUPERCONDUCTOR_MS = 2000; // how often the superconductor places a stock order
 
 let S = load() || freshState();
 refreshVisibleGens(S);
@@ -80,6 +82,14 @@ const ui = initUI({
       S.conductorOn
         ? "🎩 The conductor is back on the platform."
         : "🎩 The conductor stands down. Works are yours to buy.",
+    );
+  },
+  onToggleSuperconductor: () => {
+    S.superconductorOn = S.superconductorOn === false;
+    ui.toast(
+      S.superconductorOn
+        ? "❄️ The superconductor resumes ordering stock."
+        : "❄️ The superconductor stops ordering. The yard is yours.",
     );
   },
   onBuySpike: (id) => {
@@ -256,6 +266,7 @@ let lastFrame = performance.now();
 let lastRender = 0;
 let lastSaveAt = performance.now();
 let lastConductorAt = performance.now();
+let lastSuperAt = performance.now();
 
 function loop(now) {
   const dt = Math.min((now - lastFrame) / 1000, 1);
@@ -279,6 +290,16 @@ function loop(now) {
       ui.forceRefreshLists();
       refresh();
       ui.toast(`🎩 ${signed.icon} ${signed.name} — signed off by the conductor.`);
+    }
+  }
+
+  if (now - lastSuperAt > SUPERCONDUCTOR_MS) {
+    lastSuperAt = now;
+    const order = superconductorBuy(S, stats);
+    if (order) {
+      audio.sfx("buy");
+      refresh();
+      ui.toast(`❄️ ${order.gen.icon} ${order.count} × ${order.gen.name} — ordered in bulk.`);
     }
   }
 

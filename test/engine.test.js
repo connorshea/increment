@@ -35,6 +35,7 @@ import {
   refreshVisibleGens,
   rollBuff,
   spikeGain,
+  superconductorBuy,
   tick,
 } from "../js/engine.js";
 import { freshState } from "../js/state.js";
@@ -262,6 +263,13 @@ describe("computeStats", () => {
     expect(computeStats(S).conductor).toBe(true);
   });
 
+  it("flags the superconductor separately from the conductor", () => {
+    S.spikeUpgrades.push("sp_conductor");
+    expect(computeStats(S).superconductor).toBe(false);
+    S.spikeUpgrades.push("sp_superconductor");
+    expect(computeStats(S).superconductor).toBe(true);
+  });
+
   it("ignores upgrade ids a save may carry that no longer exist", () => {
     S.upgrades.push("upgrade_from_a_future_build");
     S.spikeUpgrades.push("sp_nonsense");
@@ -423,6 +431,86 @@ describe("conductorBuy", () => {
   });
 });
 
+describe("superconductorBuy", () => {
+  beforeEach(() => {
+    S.spikeUpgrades.push("sp_superconductor");
+    // Roster up to the Marshalling Yard, so there is a clear "best tier".
+    S.gens.handcar = 1;
+    S.gens.shunter = 1;
+    S.gens.wagon = 1;
+    S.gens.branch = 1;
+    refreshVisibleGens(S);
+    S.cargo = 1e6;
+  });
+
+  it("does nothing without the upgrade", () => {
+    S.spikeUpgrades = [];
+    expect(superconductorBuy(S, computeStats(S))).toBeNull();
+    expect(S.gens.yard).toBe(0);
+  });
+
+  it("does nothing while stood down", () => {
+    S.superconductorOn = false;
+    expect(superconductorBuy(S, computeStats(S))).toBeNull();
+    expect(S.gens.yard).toBe(0);
+  });
+
+  it("buys the best tier on the roster, not a cheaper one", () => {
+    const order = superconductorBuy(S, computeStats(S));
+    expect(order.gen.id).toBe("yard"); // the top of S.seenGens
+    expect(S.gens.yard).toBe(order.count);
+    expect(S.gens.branch).toBe(1); // lower tiers untouched
+  });
+
+  it("never spends more than half the cargo in hand", () => {
+    for (const cargo of [1e4, 1e5, 1e6, 1e9, 1e14]) {
+      const fresh = freshState();
+      fresh.spikeUpgrades.push("sp_superconductor");
+      for (const id of ["handcar", "shunter", "wagon", "branch"]) fresh.gens[id] = 1;
+      refreshVisibleGens(fresh);
+      fresh.cargo = cargo;
+
+      const order = superconductorBuy(fresh, computeStats(fresh));
+      const spent = cargo - fresh.cargo;
+      expect(spent).toBeLessThanOrEqual(cargo * 0.5 + 1e-6);
+      // ...and it is the most it could buy on that budget.
+      if (order) {
+        expect(genCost(order.gen, order.count, 1)).toBeGreaterThan(cargo * 0.5 - spent);
+      }
+    }
+  });
+
+  it("buys in bulk when the budget stretches to it", () => {
+    S.cargo = 1e9;
+    const order = superconductorBuy(S, computeStats(S));
+    expect(order.count).toBeGreaterThan(1);
+  });
+
+  it("waits rather than dropping to lesser stock it could afford", () => {
+    // Half the cargo covers a Branch Line easily, but not a Marshalling Yard.
+    S.cargo = 2 * GEN_BY_ID.yard.base - 2;
+    expect(superconductorBuy(S, computeStats(S))).toBeNull();
+    expect(S.gens.branch).toBe(1);
+    expect(S.gens.yard).toBe(0);
+
+    S.cargo = 2 * GEN_BY_ID.yard.base;
+    expect(superconductorBuy(S, computeStats(S)).count).toBe(1);
+  });
+
+  it("follows the roster up as new tiers are revealed", () => {
+    S.cargo = 1e12;
+    superconductorBuy(S, computeStats(S)); // buys yards, revealing diesel
+    expect(S.seenGens).toContain("diesel");
+    const next = superconductorBuy(S, computeStats(S));
+    expect(next.gen.id).toBe("diesel");
+  });
+
+  it("does not fall over on a save with an empty roster", () => {
+    S.seenGens = [];
+    expect(superconductorBuy(S, computeStats(S))).toBeNull();
+  });
+});
+
 // ---------------------------------------------------------------------------
 
 describe("cargo and hauling", () => {
@@ -520,10 +608,13 @@ describe("regauging", () => {
     expect(after.totalEarned).toBe(S.totalEarned);
   });
 
-  it("carries the conductor's on/off choice across the rebuild", () => {
+  it("carries both automation on/off choices across the rebuild", () => {
     S.totalEarned = REGAUGE_DIVISOR;
     S.conductorOn = false;
-    expect(doRegauge(S, freshState).state.conductorOn).toBe(false);
+    S.superconductorOn = false;
+    const { state: after } = doRegauge(S, freshState);
+    expect(after.conductorOn).toBe(false);
+    expect(after.superconductorOn).toBe(false);
   });
 
   it("opens the new line with a head start once Advance Funding is driven", () => {

@@ -17,6 +17,11 @@ of ES modules.
 - **Hire the Conductor 🎩** (a spike upgrade) and works get signed off for you,
   cheapest first, one every second and a half. There is a toggle in the Works
   header to stand them down again, and a **Buy all** button for doing it by hand.
+- **Hire the Superconductor ❄️** (250 spikes, so very much an endgame one) and
+  the best rolling stock on the roster is ordered in bulk every two seconds —
+  never spending more than half the cargo in hand, so there is always something
+  left for works and for the regauge you might be saving towards. It has its own
+  toggle in the Rolling stock header.
 - **Catch express parcels 📦** that drift across the screen for a temporary
   Full Steam, Rush Hour, or an instant windfall.
 - **Regauge** when you have moved enough cargo: you tear up the network and lay

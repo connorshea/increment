@@ -48,6 +48,7 @@ export function initUI(handlers) {
     pipUpgrades: $("#pip-upgrades"),
     buyAllBtn: $("#buy-all-btn"),
     conductorBtn: $("#conductor-btn"),
+    superBtn: $("#super-btn"),
     pipSpikes: $("#pip-spikes"),
     saveStatus: $("#save-status"),
     bgBtn: $("#bg-btn"),
@@ -68,6 +69,7 @@ export function initUI(handlers) {
   let upgradeSig = null;
   let genSig = null;
   let conductorShown = null;
+  let superShown = null;
   const genRows = new Map();
   const spikeRows = new Map();
   const achRows = new Map();
@@ -177,6 +179,7 @@ export function initUI(handlers) {
   $("#import-btn").addEventListener("click", () => handlers.onImport());
   el.buyAllBtn.addEventListener("click", () => handlers.onBuyAllUpgrades());
   el.conductorBtn.addEventListener("click", () => handlers.onToggleConductor());
+  el.superBtn.addEventListener("click", () => handlers.onToggleSuperconductor());
   el.bgBtn.addEventListener("click", () => handlers.onToggleBg());
   el.soundBtn.addEventListener("click", () => handlers.onToggleSound());
   el.vistaBtn.addEventListener("click", () => {
@@ -274,6 +277,15 @@ export function initUI(handlers) {
       row.out.textContent =
         owned > 0 ? `${fmt(total)}/s · ${fmt(each)} each` : `${fmt(each)}/s each`;
       row.tier.textContent = mult > 1 ? fmtMult(mult) : "";
+    }
+
+    const on = S.superconductorOn !== false;
+    el.superBtn.hidden = !stats.superconductor;
+    el.superBtn.classList.toggle("off", !on);
+    // Rewriting this every frame would churn the DOM for nothing.
+    if (superShown !== on) {
+      superShown = on;
+      el.superBtn.innerHTML = `<span class="emoji">❄️</span> Superconductor: ${on ? "on" : "off"}`;
     }
   }
 
@@ -558,6 +570,8 @@ export function describeEffects(effects) {
           return `open each line with ${fmt(e.cargo)} cargo`;
         case "conductor":
           return "works are bought for you, cheapest first";
+        case "superconductor":
+          return "your best rolling stock is bought for you, in bulk";
         default:
           return "";
       }

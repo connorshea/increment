@@ -30,6 +30,7 @@ const KNOWN_EFFECT_KINDS = new Set([
   "offline",
   "headStart",
   "conductor",
+  "superconductor",
 ]);
 
 const ALL_EFFECTS = [...UPGRADES, ...SPIKE_UPGRADES].flatMap((u) => u.effects);
