@@ -10,7 +10,7 @@ const TARGET_VOLUME = 0.55;
 
 export function createAudio() {
   const Ctx = window.AudioContext || window.webkitAudioContext;
-  const supported = typeof Ctx === 'function';
+  const supported = typeof Ctx === "function";
 
   let ctx = null;
   let master = null;
@@ -57,7 +57,7 @@ export function createAudio() {
     bed.loop = true;
 
     const lowpass = ctx.createBiquadFilter();
-    lowpass.type = 'lowpass';
+    lowpass.type = "lowpass";
     lowpass.frequency.value = 165;
     lowpass.Q.value = 0.8;
 
@@ -71,7 +71,7 @@ export function createAudio() {
     air.buffer = noise;
     air.loop = true;
     const band = ctx.createBiquadFilter();
-    band.type = 'bandpass';
+    band.type = "bandpass";
     band.frequency.value = 1400;
     band.Q.value = 0.5;
     const airGain = ctx.createGain();
@@ -104,7 +104,7 @@ export function createAudio() {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const band = ctx.createBiquadFilter();
-    band.type = 'bandpass';
+    band.type = "bandpass";
     band.frequency.value = 950 + Math.random() * 600;
     band.Q.value = 1.7;
     const gain = ctx.createGain();
@@ -119,7 +119,7 @@ export function createAudio() {
     const thumpSrc = ctx.createBufferSource();
     thumpSrc.buffer = noise;
     const low = ctx.createBiquadFilter();
-    low.type = 'lowpass';
+    low.type = "lowpass";
     low.frequency.value = 130;
     const thump = ctx.createGain();
     thump.gain.setValueAtTime(0.0001, when);
@@ -139,13 +139,19 @@ export function createAudio() {
     shell.gain.exponentialRampToValueAtTime(0.0001, when + length);
 
     const soften = ctx.createBiquadFilter();
-    soften.type = 'lowpass';
+    soften.type = "lowpass";
     soften.frequency.value = 1700;
     shell.connect(soften).connect(master);
 
-    for (const [freq, level] of [[196, 1], [233, 0.75], [294, 0.6], [349, 0.4], [392, 0.3]]) {
+    for (const [freq, level] of [
+      [196, 1],
+      [233, 0.75],
+      [294, 0.6],
+      [349, 0.4],
+      [392, 0.3],
+    ]) {
       const osc = ctx.createOscillator();
-      osc.type = 'triangle';
+      osc.type = "triangle";
       osc.frequency.value = freq;
       osc.detune.value = (Math.random() - 0.5) * 8;
       const voice = ctx.createGain();
@@ -162,7 +168,7 @@ export function createAudio() {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const low = ctx.createBiquadFilter();
-    low.type = 'lowpass';
+    low.type = "lowpass";
     low.frequency.value = cutoff;
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.0001, now);
@@ -182,7 +188,7 @@ export function createAudio() {
     const rip = ctx.createBufferSource();
     rip.buffer = noise;
     const sweep = ctx.createBiquadFilter();
-    sweep.type = 'bandpass';
+    sweep.type = "bandpass";
     sweep.Q.value = 1.1;
     sweep.frequency.setValueAtTime(1200, now);
     sweep.frequency.exponentialRampToValueAtTime(4200, now + 0.24);
@@ -191,7 +197,7 @@ export function createAudio() {
     ripGain.gain.linearRampToValueAtTime(0.45, now + 0.02);
     ripGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
     const wobble = ctx.createOscillator();
-    wobble.type = 'square';
+    wobble.type = "square";
     wobble.frequency.value = 62;
     const wobbleDepth = ctx.createGain();
     wobbleDepth.gain.value = 0.06;
@@ -207,7 +213,7 @@ export function createAudio() {
     const flap = ctx.createBufferSource();
     flap.buffer = noise;
     const body = ctx.createBiquadFilter();
-    body.type = 'lowpass';
+    body.type = "lowpass";
     body.frequency.value = 240;
     const flapGain = ctx.createGain();
     flapGain.gain.setValueAtTime(0.0001, flapAt);
@@ -222,7 +228,7 @@ export function createAudio() {
     const rustle = ctx.createBufferSource();
     rustle.buffer = noise;
     const hp = ctx.createBiquadFilter();
-    hp.type = 'highpass';
+    hp.type = "highpass";
     hp.frequency.value = 3200;
     const rustleGain = ctx.createGain();
     rustleGain.gain.setValueAtTime(0.0001, rustleAt);
@@ -238,7 +244,7 @@ export function createAudio() {
     const now = ctx.currentTime;
     for (let i = 0; i < freqs.length; i++) {
       const osc = ctx.createOscillator();
-      osc.type = 'sine';
+      osc.type = "sine";
       osc.frequency.value = freqs[i];
       const gain = ctx.createGain();
       const start = now + i * 0.07;
@@ -254,7 +260,7 @@ export function createAudio() {
   // ---- scheduling ---------------------------------------------------------
 
   function pump() {
-    if (!built || !wanted || ctx.state !== 'running') return;
+    if (!built || !wanted || ctx.state !== "running") return;
     const horizon = ctx.currentTime + 0.35;
 
     // Busier railway, quicker joints — but it never becomes a drum machine.
@@ -289,14 +295,14 @@ export function createAudio() {
   }
 
   function ready() {
-    return supported && wanted && unlocked && built && ctx.state === 'running';
+    return supported && wanted && unlocked && built && ctx.state === "running";
   }
 
   function maybeStart() {
     if (!supported || !wanted || !unlocked) return;
     if (!ctx) ctx = new Ctx();
     build();
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state === "suspended") ctx.resume();
     nextClack = Math.max(nextClack, ctx.currentTime + 0.2);
     fade(TARGET_VOLUME);
     startPump();
@@ -345,7 +351,7 @@ export function createAudio() {
     sfx(name) {
       if (!ready()) return;
       switch (name) {
-        case 'haul': {
+        case "haul": {
           // Rapid clicking shouldn't turn into a machine gun.
           const now = ctx.currentTime;
           if (now - lastHaulSound < 0.055) return;
@@ -353,20 +359,20 @@ export function createAudio() {
           thud(0.16, 300, 0.1);
           break;
         }
-        case 'buy':
+        case "buy":
           thud(0.2, 420, 0.14);
           clack(ctx.currentTime + 0.05, 0.05);
           break;
-        case 'spike':
+        case "spike":
           bell([880, 1318], 0.08, 1.4);
           break;
-        case 'milestone':
+        case "milestone":
           horn(ctx.currentTime, 0.085, 1.7);
           break;
-        case 'parcel':
+        case "parcel":
           unbox();
           break;
-        case 'regauge':
+        case "regauge":
           horn(ctx.currentTime, 0.14, 3);
           break;
         default:

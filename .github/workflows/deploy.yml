@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - master
-      - 'claude/**'
+      - "claude/**"
   workflow_dispatch:
 
 permissions:
@@ -34,7 +34,7 @@ jobs:
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: "."
 
       - name: Deploy
         id: deployment

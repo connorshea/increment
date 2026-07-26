@@ -56,18 +56,18 @@ also trigger a deploy by hand from the Actions tab.
 
 ## Layout
 
-| Path                | What's in it                                              |
-| ------------------- | --------------------------------------------------------- |
-| `index.html`        | Page structure                                             |
-| `css/style.css`     | All the styling                                            |
-| `js/data.js`        | Content: rolling stock, works, spike upgrades, milestones  |
-| `js/engine.js`      | Costs, multipliers, buying, regauging, the tick            |
-| `js/state.js`       | Save shape, `localStorage`, export/import                  |
-| `js/ui.js`          | DOM rendering                                              |
-| `js/audio.js`       | Web Audio synthesis: ambience, horns, and interface sounds  |
-| `js/background.js`  | The freight map that builds itself behind the page          |
-| `js/main.js`        | Wiring and the game loop                                   |
-| `js/format.js`      | Number and time formatting                                 |
+| Path               | What's in it                                               |
+| ------------------ | ---------------------------------------------------------- |
+| `index.html`       | Page structure                                             |
+| `css/style.css`    | All the styling                                            |
+| `js/data.js`       | Content: rolling stock, works, spike upgrades, milestones  |
+| `js/engine.js`     | Costs, multipliers, buying, regauging, the tick            |
+| `js/state.js`      | Save shape, `localStorage`, export/import                  |
+| `js/ui.js`         | DOM rendering                                              |
+| `js/audio.js`      | Web Audio synthesis: ambience, horns, and interface sounds |
+| `js/background.js` | The freight map that builds itself behind the page         |
+| `js/main.js`       | Wiring and the game loop                                   |
+| `js/format.js`     | Number and time formatting                                 |
 
 Adding content is mostly a matter of editing `js/data.js` — generators, upgrades
 and milestones are plain data, and `engine.js` knows how to apply each effect

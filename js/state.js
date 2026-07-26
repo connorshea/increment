@@ -1,6 +1,6 @@
-import { GENERATORS } from './data.js';
+import { GENERATORS } from "./data.js";
 
-export const SAVE_KEY = 'railhead.save.v1';
+export const SAVE_KEY = "railhead.save.v1";
 export const SAVE_VERSION = 1;
 
 export function freshState(carry = {}) {
@@ -42,11 +42,23 @@ export function normalize(raw) {
   const base = freshState();
   const S = { ...base, ...raw };
   S.gens = { ...base.gens, ...raw.gens };
-  for (const key of ['upgrades', 'spikeUpgrades', 'achievements', 'seenGens']) {
+  for (const key of ["upgrades", "spikeUpgrades", "achievements", "seenGens"]) {
     if (!Array.isArray(S[key])) S[key] = [];
   }
-  for (const key of ['cargo', 'runEarned', 'totalEarned', 'spikes', 'totalSpikes',
-    'regauges', 'hauls', 'parcels', 'playTime', 'runTime', 'bestPerSec', 'offlineVisits']) {
+  for (const key of [
+    "cargo",
+    "runEarned",
+    "totalEarned",
+    "spikes",
+    "totalSpikes",
+    "regauges",
+    "hauls",
+    "parcels",
+    "playTime",
+    "runTime",
+    "bestPerSec",
+    "offlineVisits",
+  ]) {
     S[key] = Number.isFinite(S[key]) ? S[key] : 0;
   }
   for (const g of GENERATORS) {
@@ -62,7 +74,7 @@ export function save(S) {
     localStorage.setItem(SAVE_KEY, JSON.stringify(S));
     return true;
   } catch (err) {
-    console.warn('Could not save:', err);
+    console.warn("Could not save:", err);
     return false;
   }
 }
@@ -73,7 +85,7 @@ export function load() {
     if (!raw) return null;
     return normalize(JSON.parse(raw));
   } catch (err) {
-    console.warn('Could not read save:', err);
+    console.warn("Could not read save:", err);
     return null;
   }
 }
@@ -82,21 +94,19 @@ export function wipe() {
   try {
     localStorage.removeItem(SAVE_KEY);
   } catch (err) {
-    console.warn('Could not wipe save:', err);
+    console.warn("Could not wipe save:", err);
   }
 }
 
 /** Save data as a paste-able string. */
 export function encodeSave(S) {
   const bytes = new TextEncoder().encode(JSON.stringify(S));
-  let binary = '';
+  let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary);
 }
 
 export function decodeSave(text) {
-  const json = new TextDecoder().decode(
-    Uint8Array.from(atob(text.trim()), (c) => c.charCodeAt(0)),
-  );
+  const json = new TextDecoder().decode(Uint8Array.from(atob(text.trim()), (c) => c.charCodeAt(0)));
   return normalize(JSON.parse(json));
 }

@@ -1,7 +1,14 @@
 import {
-  ACHIEVEMENTS, BUFFS, COST_GROWTH, GENERATORS, GEN_BY_ID, RUSH_BASE,
-  SPIKE_BY_ID, STEAM_BASE, UPGRADE_BY_ID,
-} from './data.js';
+  ACHIEVEMENTS,
+  BUFFS,
+  COST_GROWTH,
+  GENERATORS,
+  GEN_BY_ID,
+  RUSH_BASE,
+  SPIKE_BY_ID,
+  STEAM_BASE,
+  UPGRADE_BY_ID,
+} from "./data.js";
 
 export const REGAUGE_DIVISOR = 1e8;
 export const BASE_HAUL = 1;
@@ -82,21 +89,42 @@ export function computeStats(S) {
 
   for (const e of effects) {
     switch (e.k) {
-      case 'gen': genMult[e.target] *= e.mult; break;
-      case 'all': allMult *= e.mult; break;
-      case 'click': haulMult *= e.mult; break;
-      case 'haulRate': haulRatePct += e.pct; break;
-      case 'genPer': synergies.push(e); break;
-      case 'parcelFreq': parcelFreq *= e.mult; break;
-      case 'parcelDur': parcelDur *= e.mult; break;
-      case 'steam': steamMult *= e.mult; break;
-      case 'spikePower': spikePower += e.add; break;
-      case 'offline':
+      case "gen":
+        genMult[e.target] *= e.mult;
+        break;
+      case "all":
+        allMult *= e.mult;
+        break;
+      case "click":
+        haulMult *= e.mult;
+        break;
+      case "haulRate":
+        haulRatePct += e.pct;
+        break;
+      case "genPer":
+        synergies.push(e);
+        break;
+      case "parcelFreq":
+        parcelFreq *= e.mult;
+        break;
+      case "parcelDur":
+        parcelDur *= e.mult;
+        break;
+      case "steam":
+        steamMult *= e.mult;
+        break;
+      case "spikePower":
+        spikePower += e.add;
+        break;
+      case "offline":
         offlineHours = Math.max(offlineHours, e.hours);
         offlineRate = Math.max(offlineRate, e.rate);
         break;
-      case 'headStart': headStart = e; break;
-      default: break;
+      case "headStart":
+        headStart = e;
+        break;
+      default:
+        break;
     }
   }
 
@@ -109,7 +137,7 @@ export function computeStats(S) {
   allMult *= 1 + milestoneBonus + spikeBonus;
 
   let buffMult = 1;
-  if (S.buff && S.buff.type === 'steam') buffMult = STEAM_BASE * steamMult;
+  if (S.buff && S.buff.type === "steam") buffMult = STEAM_BASE * steamMult;
 
   const perGen = {};
   let perSec = 0;
@@ -121,12 +149,24 @@ export function computeStats(S) {
   }
 
   let haulValue = BASE_HAUL * haulMult * allMult * buffMult + perSec * haulRatePct;
-  if (S.buff && S.buff.type === 'rush') haulValue *= RUSH_BASE;
+  if (S.buff && S.buff.type === "rush") haulValue *= RUSH_BASE;
 
   return {
-    perSec, perGen, haulValue, haulRatePct,
-    allMult, buffMult, milestoneBonus, spikeBonus, spikePower,
-    parcelFreq, parcelDur, steamMult, offlineHours, offlineRate, headStart,
+    perSec,
+    perGen,
+    haulValue,
+    haulRatePct,
+    allMult,
+    buffMult,
+    milestoneBonus,
+    spikeBonus,
+    spikePower,
+    parcelFreq,
+    parcelDur,
+    steamMult,
+    offlineHours,
+    offlineRate,
+    headStart,
   };
 }
 
@@ -145,7 +185,7 @@ export function buyGenerator(S, genId, amount) {
   const gen = GEN_BY_ID[genId];
   if (!gen) return 0;
   const owned = S.gens[genId] || 0;
-  const count = amount === 'max' ? maxAffordable(gen, owned, S.cargo) : amount;
+  const count = amount === "max" ? maxAffordable(gen, owned, S.cargo) : amount;
   if (count < 1) return 0;
   const cost = genCost(gen, owned, count);
   if (cost > S.cargo) return 0;
@@ -257,7 +297,7 @@ export function rollBuff(random = Math.random) {
 export function applyBuff(S, type, stats) {
   const buff = BUFFS[type];
   S.parcels += 1;
-  if (type === 'windfall') {
+  if (type === "windfall") {
     const instant = Math.max(stats.perSec * 900, S.cargo * 0.15, stats.haulValue * 25);
     addCargo(S, instant);
     return { type, buff, instant };

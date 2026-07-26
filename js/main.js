@@ -1,14 +1,25 @@
-import { BUFFS } from './data.js';
+import { BUFFS } from "./data.js";
 import {
-  applyBuff, applyOffline, buyGenerator, buySpikeUpgrade, buyUpgrade, checkAchievements,
-  computeStats, doRegauge, haul, nextParcelDelay, parcelLifetime, refreshVisibleGens,
-  rollBuff, tick,
-} from './engine.js';
-import { fmt, fmtTime } from './format.js';
-import { createAudio } from './audio.js';
-import { createBackground } from './background.js';
-import { decodeSave, encodeSave, freshState, load, save, wipe } from './state.js';
-import { initUI } from './ui.js';
+  applyBuff,
+  applyOffline,
+  buyGenerator,
+  buySpikeUpgrade,
+  buyUpgrade,
+  checkAchievements,
+  computeStats,
+  doRegauge,
+  haul,
+  nextParcelDelay,
+  parcelLifetime,
+  refreshVisibleGens,
+  rollBuff,
+  tick,
+} from "./engine.js";
+import { fmt, fmtTime } from "./format.js";
+import { createAudio } from "./audio.js";
+import { createBackground } from "./background.js";
+import { decodeSave, encodeSave, freshState, load, save, wipe } from "./state.js";
+import { initUI } from "./ui.js";
 
 const AUTOSAVE_MS = 20_000;
 const RENDER_MS = 66; // ~15fps for the DOM; the simulation itself runs every frame
@@ -20,7 +31,7 @@ refreshVisibleGens(S);
 let stats = computeStats(S);
 let parcelActive = null;
 
-const background = createBackground(document.getElementById('bg'));
+const background = createBackground(document.getElementById("bg"));
 background.start();
 background.setEnabled(S.bgOn !== false);
 
@@ -30,39 +41,39 @@ audio.setEnabled(S.soundOn !== false);
 // Browsers won't let a page make noise until it's been interacted with.
 function unlockAudio() {
   audio.unlock();
-  window.removeEventListener('pointerdown', unlockAudio);
-  window.removeEventListener('keydown', unlockAudio);
+  window.removeEventListener("pointerdown", unlockAudio);
+  window.removeEventListener("keydown", unlockAudio);
 }
-window.addEventListener('pointerdown', unlockAudio);
-window.addEventListener('keydown', unlockAudio);
+window.addEventListener("pointerdown", unlockAudio);
+window.addEventListener("keydown", unlockAudio);
 
 const ui = initUI({
   onHaul: handleHaul,
   onBuyGen: (id, amount) => {
     if (buyGenerator(S, id, amount) > 0) {
-      audio.sfx('buy');
+      audio.sfx("buy");
       refresh();
     }
   },
   onBuyUpgrade: (id) => {
     if (buyUpgrade(S, id)) {
-      audio.sfx('buy');
+      audio.sfx("buy");
       ui.forceRefreshLists();
       refresh();
     }
   },
   onBuySpike: (id) => {
     if (buySpikeUpgrade(S, id)) {
-      audio.sfx('spike');
-      ui.toast('Spike driven. The whole railway feels it.');
+      audio.sfx("spike");
+      ui.toast("Spike driven. The whole railway feels it.");
       refresh();
     }
   },
   onRegauge: handleRegauge,
   onSave: (manual) => {
     const ok = save(S);
-    ui.setSaveStatus(ok ? `saved ${new Date().toLocaleTimeString()}` : 'save failed');
-    if (manual) ui.toast(ok ? 'Saved.' : 'Could not save — is storage blocked?');
+    ui.setSaveStatus(ok ? `saved ${new Date().toLocaleTimeString()}` : "save failed");
+    if (manual) ui.toast(ok ? "Saved." : "Could not save — is storage blocked?");
   },
   onExport: handleExport,
   onImport: handleImport,
@@ -86,8 +97,8 @@ const away = (Date.now() - (S.lastSaved || Date.now())) / 1000;
 const offlineGain = applyOffline(S, stats, away);
 if (offlineGain > 0) {
   ui.toast(
-    `You were away ${fmtTime(Math.min(away, stats.offlineHours * 3600))} — `
-    + `the railway moved ${fmt(offlineGain)} cargo without you.`,
+    `You were away ${fmtTime(Math.min(away, stats.offlineHours * 3600))} — ` +
+      `the railway moved ${fmt(offlineGain)} cargo without you.`,
   );
 }
 // Reloading shouldn't wipe out a parcel you were nearly owed, or hand you one
@@ -103,9 +114,9 @@ S.nextParcel = Math.max(
 
 function handleHaul(ev) {
   const gained = haul(S, stats);
-  audio.sfx('haul');
+  audio.sfx("haul");
   ui.pressLoader();
-  ui.floatNumber(ev.clientX, ev.clientY - 14, `+${fmt(gained)}`, S.buff?.type === 'rush');
+  ui.floatNumber(ev.clientX, ev.clientY - 14, `+${fmt(gained)}`, S.buff?.type === "rush");
   refresh();
 }
 
@@ -114,16 +125,16 @@ function handleRegauge() {
   if (!result) return;
   const totalAfter = S.totalSpikes + result.gain;
   const ok = window.confirm(
-    'Tear up the network and lay it again?\n\n'
-    + `You drive ${result.gain} golden spike${result.gain === 1 ? '' : 's'} `
-    + `(${fmt(totalAfter)} in total, worth `
-    + `${Math.round(totalAfter * stats.spikePower * 100)}% faster running, forever).\n\n`
-    + 'You lose your cargo, all your rolling stock, and the works you built on this line. '
-    + 'Spike upgrades and milestones stay.',
+    "Tear up the network and lay it again?\n\n" +
+      `You drive ${result.gain} golden spike${result.gain === 1 ? "" : "s"} ` +
+      `(${fmt(totalAfter)} in total, worth ` +
+      `${Math.round(totalAfter * stats.spikePower * 100)}% faster running, forever).\n\n` +
+      "You lose your cargo, all your rolling stock, and the works you built on this line. " +
+      "Spike upgrades and milestones stay.",
   );
   if (!ok) return;
 
-  audio.sfx('regauge');
+  audio.sfx("regauge");
   S = result.state;
   parcelActive?.();
   parcelActive = null;
@@ -132,7 +143,7 @@ function handleRegauge() {
   refresh();
   save(S);
   ui.toast(
-    `Regauged! ${result.gain} golden spike${result.gain === 1 ? '' : 's'} carried to the new line. 🔩`,
+    `Regauged! ${result.gain} golden spike${result.gain === 1 ? "" : "s"} carried to the new line. 🔩`,
     true,
   );
 }
@@ -140,20 +151,20 @@ function handleRegauge() {
 function handleExport() {
   save(S);
   openModal({
-    title: 'Export save',
-    copy: 'Copy this somewhere safe. Paste it into Import to bring your railway back.',
+    title: "Export save",
+    copy: "Copy this somewhere safe. Paste it into Import to bring your railway back.",
     value: encodeSave(S),
     okLabel: null,
   });
-  document.getElementById('modal-text').select();
+  document.getElementById("modal-text").select();
 }
 
 function handleImport() {
   openModal({
-    title: 'Import save',
-    copy: 'Paste an exported save here. This replaces the railway you are running now.',
-    value: '',
-    okLabel: 'Load it',
+    title: "Import save",
+    copy: "Paste an exported save here. This replaces the railway you are running now.",
+    value: "",
+    okLabel: "Load it",
     onOk: (value) => {
       try {
         S = decodeSave(value);
@@ -162,16 +173,17 @@ function handleImport() {
         ui.forceRefreshLists();
         refresh();
         save(S);
-        ui.toast('Save loaded.');
+        ui.toast("Save loaded.");
       } catch {
-        ui.toast('That did not look like a save.');
+        ui.toast("That did not look like a save.");
       }
     },
   });
 }
 
 function handleWipe() {
-  if (!window.confirm('Scrap the whole railway? Spikes, milestones, everything. There is no undo.')) return;
+  if (!window.confirm("Scrap the whole railway? Spikes, milestones, everything. There is no undo."))
+    return;
   wipe();
   S = freshState();
   refreshVisibleGens(S);
@@ -180,7 +192,7 @@ function handleWipe() {
   S.nextParcel = Date.now() + 60_000;
   ui.forceRefreshLists();
   refresh();
-  ui.toast('Scrapped. One handcar again.');
+  ui.toast("Scrapped. One handcar again.");
 }
 
 // ---------------------------------------------------------------------------
@@ -202,9 +214,9 @@ function catchParcel() {
   const type = rollBuff();
   const result = applyBuff(S, type, stats);
   const buff = BUFFS[type];
-  audio.sfx('parcel');
+  audio.sfx("parcel");
   ui.toast(
-    type === 'windfall'
+    type === "windfall"
       ? `${buff.icon} ${buff.toast} +${fmt(result.instant)} cargo.`
       : `${buff.icon} ${buff.toast} (${buff.duration}s)`,
     true,
@@ -234,7 +246,7 @@ function loop(now) {
   const unlocked = checkAchievements(S, stats);
   if (unlocked.length) {
     stats = computeStats(S);
-    audio.sfx('milestone');
+    audio.sfx("milestone");
     for (const ach of unlocked) ui.toast(`${ach.icon} Milestone: ${ach.name}`);
   }
 
@@ -267,17 +279,17 @@ function loop(now) {
 // ---------------------------------------------------------------------------
 
 function openModal({ title, copy, value, okLabel, onOk }) {
-  const modal = document.getElementById('modal');
-  const text = document.getElementById('modal-text');
-  const okBtn = document.getElementById('modal-ok');
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-copy').textContent = copy;
+  const modal = document.getElementById("modal");
+  const text = document.getElementById("modal-text");
+  const okBtn = document.getElementById("modal-ok");
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-copy").textContent = copy;
   text.value = value;
   okBtn.hidden = !okLabel;
   if (okLabel) okBtn.textContent = okLabel;
 
   const cleanup = () => {
-    okBtn.removeEventListener('click', ok);
+    okBtn.removeEventListener("click", ok);
     modal.close();
   };
   const ok = () => {
@@ -285,8 +297,8 @@ function openModal({ title, copy, value, okLabel, onOk }) {
     cleanup();
     onOk?.(v);
   };
-  okBtn.addEventListener('click', ok);
-  document.getElementById('modal-cancel').onclick = cleanup;
+  okBtn.addEventListener("click", ok);
+  document.getElementById("modal-cancel").onclick = cleanup;
   modal.showModal();
 }
 
@@ -294,8 +306,8 @@ function openModal({ title, copy, value, okLabel, onOk }) {
 // Lifecycle
 // ---------------------------------------------------------------------------
 
-window.addEventListener('pagehide', () => save(S));
-document.addEventListener('visibilitychange', () => {
+window.addEventListener("pagehide", () => save(S));
+document.addEventListener("visibilitychange", () => {
   audio.setActive(!document.hidden);
   if (document.hidden) save(S);
 });
@@ -305,6 +317,6 @@ ui.render(S, stats);
 requestAnimationFrame(loop);
 
 if (S.totalEarned === 0) {
-  ui.toast('Push the handcar. Everything starts there.');
-  ui.toast('Hold the button down and it keeps loading on its own.');
+  ui.toast("Push the handcar. Everything starts there.");
+  ui.toast("Hold the button down and it keeps loading on its own.");
 }

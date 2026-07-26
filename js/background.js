@@ -21,13 +21,19 @@ const RAIL_GAUGE = 2.6; // half-distance between the two rails
 
 // Muted enough for a night map, separable enough to read as distinct lines.
 const PALETTE = [
-  '#f5a623', '#4aa8ff', '#34c77b', '#ff5f56',
-  '#b07cff', '#19c2c2', '#ffd23f', '#ff7bb0',
+  "#f5a623",
+  "#4aa8ff",
+  "#34c77b",
+  "#ff5f56",
+  "#b07cff",
+  "#19c2c2",
+  "#ffd23f",
+  "#ff7bb0",
 ];
 
-const SHAPES = ['circle', 'square', 'triangle', 'pentagon', 'diamond', 'cross', 'star'];
+const SHAPES = ["circle", "square", "triangle", "pentagon", "diamond", "cross", "star"];
 
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Small deterministic PRNG, so a given seed always draws the same map. */
 function mulberry32(seed) {
@@ -49,27 +55,27 @@ function rgba(hex, alpha) {
  *  freight waiting. Far cheaper than a canvas shadow per station per frame. */
 function makeGlowSprite() {
   const size = 64;
-  const sprite = document.createElement('canvas');
+  const sprite = document.createElement("canvas");
   sprite.width = size;
   sprite.height = size;
-  const g = sprite.getContext('2d');
+  const g = sprite.getContext("2d");
   const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  grad.addColorStop(0, 'rgba(255, 198, 124, 0.9)');
-  grad.addColorStop(0.35, 'rgba(255, 176, 96, 0.34)');
-  grad.addColorStop(1, 'rgba(255, 170, 90, 0)');
+  grad.addColorStop(0, "rgba(255, 198, 124, 0.9)");
+  grad.addColorStop(0.35, "rgba(255, 176, 96, 0.34)");
+  grad.addColorStop(1, "rgba(255, 170, 90, 0)");
   g.fillStyle = grad;
   g.fillRect(0, 0, size, size);
   return sprite;
 }
 
 export function createBackground(canvas) {
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   const glowSprite = makeGlowSprite();
 
   // The track only changes while it is being laid, so it lives on its own
   // layer and is only redrawn when it actually grows.
-  const trackLayer = document.createElement('canvas');
-  const trackCtx = trackLayer.getContext('2d');
+  const trackLayer = document.createElement("canvas");
+  const trackCtx = trackLayer.getContext("2d");
   let trackDirty = true;
 
   let width = 0;
@@ -138,9 +144,7 @@ export function createBackground(canvas) {
         ? [{ x: a.x + sx * ady, y: b.y }, b]
         : [{ x: b.x - sx * ady, y: a.y }, b];
     }
-    return diagonalFirst
-      ? [{ x: b.x, y: a.y + sy * adx }, b]
-      : [{ x: a.x, y: b.y - sy * adx }, b];
+    return diagonalFirst ? [{ x: b.x, y: a.y + sy * adx }, b] : [{ x: a.x, y: b.y - sy * adx }, b];
   }
 
   /**
@@ -270,7 +274,9 @@ export function createBackground(canvas) {
 
     const cum = [0];
     for (let i = 1; i < points.length; i++) {
-      cum.push(cum[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y));
+      cum.push(
+        cum[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y),
+      );
     }
 
     return {
@@ -356,7 +362,8 @@ export function createBackground(canvas) {
     for (let i = 0; i < net.stations.length; i++) {
       const station = net.stations[i];
       const wanted = i < targetStations ? 1 : 0;
-      station.reveal += Math.sign(wanted - station.reveal) * Math.min(dt * 1.8, Math.abs(wanted - station.reveal));
+      station.reveal +=
+        Math.sign(wanted - station.reveal) * Math.min(dt * 1.8, Math.abs(wanted - station.reveal));
     }
 
     // Freight gathers on the platforms and is taken away again. The station's
@@ -376,7 +383,8 @@ export function createBackground(canvas) {
       const target = targetLength(line);
       if (line.drawn !== target) trackDirty = true;
       if (line.drawn < target) line.drawn = Math.min(target, line.drawn + BUILD_SPEED * dt);
-      else if (line.drawn > target) line.drawn = Math.max(target, line.drawn - BUILD_SPEED * 2 * dt);
+      else if (line.drawn > target)
+        line.drawn = Math.max(target, line.drawn - BUILD_SPEED * 2 * dt);
 
       // One train per stretch of line, up to three.
       const wantTrains = line.drawn < 90 ? 0 : Math.min(3, 1 + Math.floor(line.drawn / 420));
@@ -416,23 +424,23 @@ export function createBackground(canvas) {
   function shapePath(x, y, r, shape) {
     ctx.beginPath();
     switch (shape) {
-      case 'square':
+      case "square":
         ctx.rect(x - r, y - r, r * 2, r * 2);
         break;
-      case 'triangle':
+      case "triangle":
         ctx.moveTo(x, y - r * 1.15);
         ctx.lineTo(x + r * 1.1, y + r * 0.8);
         ctx.lineTo(x - r * 1.1, y + r * 0.8);
         ctx.closePath();
         break;
-      case 'diamond':
+      case "diamond":
         ctx.moveTo(x, y - r * 1.2);
         ctx.lineTo(x + r * 1.2, y);
         ctx.lineTo(x, y + r * 1.2);
         ctx.lineTo(x - r * 1.2, y);
         ctx.closePath();
         break;
-      case 'pentagon':
+      case "pentagon":
         for (let i = 0; i < 5; i++) {
           const a = -Math.PI / 2 + (i * TAU) / 5;
           const px = x + Math.cos(a) * r * 1.15;
@@ -442,7 +450,7 @@ export function createBackground(canvas) {
         }
         ctx.closePath();
         break;
-      case 'cross': {
+      case "cross": {
         const t = r * 0.42;
         ctx.moveTo(x - t, y - r);
         ctx.lineTo(x + t, y - r);
@@ -459,7 +467,7 @@ export function createBackground(canvas) {
         ctx.closePath();
         break;
       }
-      case 'star':
+      case "star":
         for (let i = 0; i < 10; i++) {
           const a = -Math.PI / 2 + (i * Math.PI) / 5;
           const rr = i % 2 === 0 ? r * 1.35 : r * 0.55;
@@ -506,9 +514,9 @@ export function createBackground(canvas) {
   function drawBed(g, pts) {
     tracePath(g, pts);
     g.lineWidth = 9.5;
-    g.lineJoin = 'round';
-    g.lineCap = 'round';
-    g.strokeStyle = 'rgba(8, 11, 16, 0.82)';
+    g.lineJoin = "round";
+    g.lineCap = "round";
+    g.strokeStyle = "rgba(8, 11, 16, 0.82)";
     g.stroke();
   }
 
@@ -517,8 +525,8 @@ export function createBackground(canvas) {
     tracePath(g, pts);
     g.setLineDash([2.2, 6.4]);
     g.lineWidth = 8;
-    g.lineCap = 'butt';
-    g.lineJoin = 'round';
+    g.lineCap = "butt";
+    g.lineJoin = "round";
     g.strokeStyle = rgba(color, 0.13);
     g.stroke();
     g.setLineDash([]);
@@ -528,7 +536,7 @@ export function createBackground(canvas) {
   function drawRails(g, pts, color) {
     g.strokeStyle = rgba(color, 0.32);
     g.lineWidth = 1.25;
-    g.lineCap = 'round';
+    g.lineCap = "round";
     for (const side of [-1, 1]) {
       g.beginPath();
       for (let i = 1; i < pts.length; i++) {
@@ -552,7 +560,7 @@ export function createBackground(canvas) {
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.angle);
-      ctx.fillStyle = 'rgba(6, 9, 13, 0.92)';
+      ctx.fillStyle = "rgba(6, 9, 13, 0.92)";
       ctx.beginPath();
       ctx.roundRect(-CAR / 2 - 1, -4.2, CAR + 2, 8.4, 2.4);
       ctx.fill();
@@ -563,7 +571,7 @@ export function createBackground(canvas) {
         ctx.fill();
       } else {
         // An open wagon with a load sitting in it.
-        ctx.fillStyle = 'rgba(12, 16, 22, 0.95)';
+        ctx.fillStyle = "rgba(12, 16, 22, 0.95)";
         ctx.beginPath();
         ctx.roundRect(-CAR / 2, -2.7, CAR, 5.4, 1.4);
         ctx.fill();
@@ -590,7 +598,7 @@ export function createBackground(canvas) {
     }
 
     shapePath(station.x, station.y, r, station.shape);
-    ctx.fillStyle = 'rgba(10, 13, 18, 0.96)';
+    ctx.fillStyle = "rgba(10, 13, 18, 0.96)";
     ctx.fill();
 
     ctx.strokeStyle = `rgba(215, 224, 235, ${0.38 * station.reveal})`;
@@ -609,8 +617,10 @@ export function createBackground(canvas) {
       // cross, one doesn't bury the other under its ballast.
       const built = net.lines.map(builtPoints);
       for (const pts of built) if (pts) drawBed(trackCtx, pts);
-      for (let i = 0; i < built.length; i++) if (built[i]) drawSleepers(trackCtx, built[i], net.lines[i].color);
-      for (let i = 0; i < built.length; i++) if (built[i]) drawRails(trackCtx, built[i], net.lines[i].color);
+      for (let i = 0; i < built.length; i++)
+        if (built[i]) drawSleepers(trackCtx, built[i], net.lines[i].color);
+      for (let i = 0; i < built.length; i++)
+        if (built[i]) drawRails(trackCtx, built[i], net.lines[i].color);
     }
     ctx.drawImage(trackLayer, 0, 0, width, height);
 
@@ -631,7 +641,7 @@ export function createBackground(canvas) {
     requestAnimationFrame(frame);
   }
 
-  window.addEventListener('resize', debounce(resize, 200));
+  window.addEventListener("resize", debounce(resize, 200));
   resize();
 
   return {
