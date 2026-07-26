@@ -50,8 +50,11 @@ export function initUI(handlers) {
   };
 
   let buyAmount = 1;
-  let upgradeSig = '';
-  let genSig = '';
+  // null, not '' — an empty upgrade list serialises to '', so using '' as the
+  // "rebuild me" sentinel collides with it and the rebuild gets skipped,
+  // stranding the last row on screen after you buy it.
+  let upgradeSig = null;
+  let genSig = null;
   const genRows = new Map();
   const spikeRows = new Map();
   const achRows = new Map();
@@ -471,8 +474,8 @@ export function initUI(handlers) {
   }
 
   function forceRefreshLists() {
-    upgradeSig = '';
-    genSig = '';
+    upgradeSig = null;
+    genSig = null;
   }
 
   return {
