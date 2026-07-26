@@ -173,6 +173,66 @@ export function createAudio() {
     src.stop(now + decay + 0.05);
   }
 
+  /** Tape peeling, the flap dropping open, paper moving inside. */
+  function unbox() {
+    const now = ctx.currentTime;
+
+    // The tape coming off: noise through a bandpass that sweeps upward, with a
+    // fast square wobble on the gain for the ratchety texture of a tear.
+    const rip = ctx.createBufferSource();
+    rip.buffer = noise;
+    const sweep = ctx.createBiquadFilter();
+    sweep.type = 'bandpass';
+    sweep.Q.value = 1.1;
+    sweep.frequency.setValueAtTime(1200, now);
+    sweep.frequency.exponentialRampToValueAtTime(4200, now + 0.24);
+    const ripGain = ctx.createGain();
+    ripGain.gain.setValueAtTime(0.0001, now);
+    ripGain.gain.linearRampToValueAtTime(0.45, now + 0.02);
+    ripGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+    const wobble = ctx.createOscillator();
+    wobble.type = 'square';
+    wobble.frequency.value = 62;
+    const wobbleDepth = ctx.createGain();
+    wobbleDepth.gain.value = 0.06;
+    wobble.connect(wobbleDepth).connect(ripGain.gain);
+    rip.connect(sweep).connect(ripGain).connect(master);
+    rip.start(now, Math.random() * 3, 0.35);
+    rip.stop(now + 0.32);
+    wobble.start(now);
+    wobble.stop(now + 0.32);
+
+    // The flap dropping open.
+    const flapAt = now + 0.2;
+    const flap = ctx.createBufferSource();
+    flap.buffer = noise;
+    const body = ctx.createBiquadFilter();
+    body.type = 'lowpass';
+    body.frequency.value = 240;
+    const flapGain = ctx.createGain();
+    flapGain.gain.setValueAtTime(0.0001, flapAt);
+    flapGain.gain.linearRampToValueAtTime(0.55, flapAt + 0.01);
+    flapGain.gain.exponentialRampToValueAtTime(0.0001, flapAt + 0.2);
+    flap.connect(body).connect(flapGain).connect(master);
+    flap.start(flapAt, Math.random() * 3, 0.25);
+    flap.stop(flapAt + 0.24);
+
+    // Packing paper, somewhere in there.
+    const rustleAt = now + 0.26;
+    const rustle = ctx.createBufferSource();
+    rustle.buffer = noise;
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 3200;
+    const rustleGain = ctx.createGain();
+    rustleGain.gain.setValueAtTime(0.0001, rustleAt);
+    rustleGain.gain.linearRampToValueAtTime(0.13, rustleAt + 0.04);
+    rustleGain.gain.exponentialRampToValueAtTime(0.0001, rustleAt + 0.34);
+    rustle.connect(hp).connect(rustleGain).connect(master);
+    rustle.start(rustleAt, Math.random() * 3, 0.4);
+    rustle.stop(rustleAt + 0.38);
+  }
+
   /** A small struck-metal tone, for milestones and spikes. */
   function bell(freqs, volume = 0.09, decay = 1.1) {
     const now = ctx.currentTime;
@@ -301,10 +361,10 @@ export function createAudio() {
           bell([880, 1318], 0.08, 1.4);
           break;
         case 'milestone':
-          bell([659, 988, 1318], 0.07, 1.2);
+          horn(ctx.currentTime, 0.085, 1.7);
           break;
         case 'parcel':
-          horn(ctx.currentTime, 0.11, 1.1);
+          unbox();
           break;
         case 'regauge':
           horn(ctx.currentTime, 0.14, 3);

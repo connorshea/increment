@@ -23,8 +23,9 @@ of ES modules.
 
 The soundtrack is synthesised in the browser — there are no audio files in this
 repo. A low rumble of rolling stock, wheels ticking over rail joints (the rhythm
-picks up as the railway gets busier), the odd distant horn, and short sounds for
-hauling, buying, and catching parcels. Browsers block audio until you interact
+picks up as the railway gets busier), and the odd distant horn. Opening an
+express parcel sounds like opening a parcel — tape, flap, packing paper — and
+reaching a milestone is answered with a soft horn. Browsers block audio until you interact
 with the page, so it fades in on your first click; **Sound: on/off** in the
 footer turns it off for good, and the choice is saved.
 
