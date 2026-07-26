@@ -809,6 +809,42 @@ h4 {
   color: var(--ink-faint);
 }
 
+/* A driven spike is permanent and worth being able to pick out at a glance, so
+   it reads as a filled-in plaque rather than as another greyed-out row. */
+.upg-driven {
+  display: none;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  border: 1px solid rgba(127, 182, 232, 0.45);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
+}
+.upg-driven::before {
+  content: "✓ ";
+}
+.upg.spike.bought {
+  opacity: 1;
+  border-color: rgba(127, 182, 232, 0.45);
+  background: linear-gradient(90deg, rgba(127, 182, 232, 0.14), rgba(127, 182, 232, 0.03));
+  box-shadow: inset 3px 0 0 var(--accent-2);
+}
+.upg.spike.bought .upg-name {
+  color: var(--accent-2);
+}
+.upg.spike.bought .upg-desc {
+  opacity: 0.75;
+}
+.upg.spike.bought .upg-cost {
+  display: none;
+}
+.upg.spike.bought .upg-driven {
+  display: inline-block;
+}
+
 .empty {
   color: var(--ink-faint);
   font-style: italic;

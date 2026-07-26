@@ -85,7 +85,10 @@ export function initUI(handlers) {
         <span class="upg-name">${upg.name}</span><br>
         <span class="upg-desc">${upg.desc}</span>
       </span>
-      <span class="upg-cost">${upg.cost} <span class="emoji">🔩</span></span>`;
+      <span class="upg-tag">
+        <span class="upg-cost">${upg.cost} <span class="emoji">🔩</span></span>
+        <span class="upg-driven">driven</span>
+      </span>`;
     btn.addEventListener("click", () => handlers.onBuySpike(upg.id));
     const li = document.createElement("li");
     li.appendChild(btn);
