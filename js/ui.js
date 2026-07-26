@@ -38,6 +38,7 @@ export function initUI(handlers) {
     pipSpikes: $('#pip-spikes'),
     saveStatus: $('#save-status'),
     bgBtn: $('#bg-btn'),
+    soundBtn: $('#sound-btn'),
     parcelLayer: $('#parcel-layer'),
     toastLayer: $('#toast-layer'),
     loader: $('#loader'),
@@ -64,7 +65,7 @@ export function initUI(handlers) {
         <span class="upg-name">${upg.name}</span><br>
         <span class="upg-desc">${upg.desc}</span>
       </span>
-      <span class="upg-cost">${upg.cost} 🔩</span>`;
+      <span class="upg-cost">${upg.cost} <span class="emoji">🔩</span></span>`;
     btn.addEventListener('click', () => handlers.onBuySpike(upg.id));
     const li = document.createElement('li');
     li.appendChild(btn);
@@ -113,6 +114,7 @@ export function initUI(handlers) {
   $('#export-btn').addEventListener('click', () => handlers.onExport());
   $('#import-btn').addEventListener('click', () => handlers.onImport());
   el.bgBtn.addEventListener('click', () => handlers.onToggleBg());
+  el.soundBtn.addEventListener('click', () => handlers.onToggleSound());
 
   // ---- rendering ----------------------------------------------------------
 
@@ -186,6 +188,7 @@ export function initUI(handlers) {
       row.cost.classList.toggle('too-dear', !canAfford);
       row.owned.textContent = owned;
       row.btn.classList.toggle('affordable', canAfford);
+      row.btn.disabled = !canAfford;
       const { each, total, mult } = stats.perGen[id];
       row.out.textContent = owned > 0
         ? `${fmt(total)}/s · ${fmt(each)} each`
@@ -233,16 +236,19 @@ export function initUI(handlers) {
     }
 
     for (const btn of el.upgradeList.querySelectorAll('.upg')) {
-      btn.classList.toggle('affordable', Number(btn.dataset.cost) <= S.cargo);
+      const affordable = Number(btn.dataset.cost) <= S.cargo;
+      btn.classList.toggle('affordable', affordable);
+      btn.disabled = !affordable;
     }
   }
 
   function renderSpikes(S) {
     for (const [id, btn] of spikeRows) {
       const bought = S.spikeUpgrades.includes(id);
+      const affordable = !bought && S.spikes >= Number(btn.dataset.cost);
       btn.classList.toggle('bought', bought);
-      btn.classList.toggle('affordable', !bought && S.spikes >= Number(btn.dataset.cost));
-      btn.disabled = bought;
+      btn.classList.toggle('affordable', affordable);
+      btn.disabled = bought || !affordable;
     }
   }
 
@@ -317,6 +323,7 @@ export function initUI(handlers) {
       (u) => !S.spikeUpgrades.includes(u.id) && S.spikes >= u.cost,
     );
     el.bgBtn.textContent = `Background: ${S.bgOn ? 'on' : 'off'}`;
+    el.soundBtn.textContent = `Sound: ${S.soundOn ? 'on' : 'off'}`;
   }
 
   function render(S, stats) {

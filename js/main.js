@@ -5,6 +5,7 @@ import {
   rollBuff, tick,
 } from './engine.js';
 import { fmt, fmtTime } from './format.js';
+import { createAudio } from './audio.js';
 import { createBackground } from './background.js';
 import { decodeSave, encodeSave, freshState, load, save, wipe } from './state.js';
 import { initUI } from './ui.js';
@@ -23,19 +24,36 @@ const background = createBackground(document.getElementById('bg'));
 background.start();
 background.setEnabled(S.bgOn !== false);
 
+const audio = createAudio();
+audio.setEnabled(S.soundOn !== false);
+
+// Browsers won't let a page make noise until it's been interacted with.
+function unlockAudio() {
+  audio.unlock();
+  window.removeEventListener('pointerdown', unlockAudio);
+  window.removeEventListener('keydown', unlockAudio);
+}
+window.addEventListener('pointerdown', unlockAudio);
+window.addEventListener('keydown', unlockAudio);
+
 const ui = initUI({
   onHaul: handleHaul,
   onBuyGen: (id, amount) => {
-    if (buyGenerator(S, id, amount) > 0) refresh();
+    if (buyGenerator(S, id, amount) > 0) {
+      audio.sfx('buy');
+      refresh();
+    }
   },
   onBuyUpgrade: (id) => {
     if (buyUpgrade(S, id)) {
+      audio.sfx('buy');
       ui.forceRefreshLists();
       refresh();
     }
   },
   onBuySpike: (id) => {
     if (buySpikeUpgrade(S, id)) {
+      audio.sfx('spike');
       ui.toast('Spike driven. The whole railway feels it.');
       refresh();
     }
@@ -52,6 +70,10 @@ const ui = initUI({
   onToggleBg: () => {
     S.bgOn = !S.bgOn;
     background.setEnabled(S.bgOn);
+  },
+  onToggleSound: () => {
+    S.soundOn = !S.soundOn;
+    audio.setEnabled(S.soundOn);
   },
   onTabChange: () => refresh(),
 });
@@ -81,6 +103,7 @@ S.nextParcel = Math.max(
 
 function handleHaul(ev) {
   const gained = haul(S, stats);
+  audio.sfx('haul');
   ui.pressLoader();
   ui.floatNumber(ev.clientX, ev.clientY - 14, `+${fmt(gained)}`, S.buff?.type === 'rush');
   refresh();
@@ -100,6 +123,7 @@ function handleRegauge() {
   );
   if (!ok) return;
 
+  audio.sfx('regauge');
   S = result.state;
   parcelActive?.();
   parcelActive = null;
@@ -178,6 +202,7 @@ function catchParcel() {
   const type = rollBuff();
   const result = applyBuff(S, type, stats);
   const buff = BUFFS[type];
+  audio.sfx('parcel');
   ui.toast(
     type === 'windfall'
       ? `${buff.icon} ${buff.toast} +${fmt(result.instant)} cargo.`
@@ -209,6 +234,7 @@ function loop(now) {
   const unlocked = checkAchievements(S, stats);
   if (unlocked.length) {
     stats = computeStats(S);
+    audio.sfx('milestone');
     for (const ach of unlocked) ui.toast(`${ach.icon} Milestone: ${ach.name}`);
   }
 
@@ -217,7 +243,9 @@ function loop(now) {
   if (now - lastRender > RENDER_MS) {
     lastRender = now;
     ui.render(S, stats);
-    background.update(Math.log10(1 + stats.perSec) / 12, S.regauges);
+    const busyness = Math.log10(1 + stats.perSec) / 12;
+    background.update(busyness, S.regauges);
+    audio.setIntensity(busyness);
   }
 
   if (now - lastSaveAt > AUTOSAVE_MS) {
@@ -262,6 +290,7 @@ function openModal({ title, copy, value, okLabel, onOk }) {
 
 window.addEventListener('pagehide', () => save(S));
 document.addEventListener('visibilitychange', () => {
+  audio.setActive(!document.hidden);
   if (document.hidden) save(S);
 });
 

@@ -14,6 +14,27 @@
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   --font: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  /* Icons must name an emoji font explicitly. Left to fall back through the
+     serif stack, macOS sizes them against the serif font's em box (and picks
+     monochrome glyphs for some characters), so they drift out of proportion
+     with the rest of the page as you zoom. Never put this first in a stack
+     used for text — Apple Color Emoji also maps the digits, for keycaps. */
+  --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+}
+
+/* Every emoji in the UI goes through this: a fixed square box, emoji font,
+   and a size in `em` so it scales with page zoom exactly like the text does. */
+.emoji,
+.brand-mark,
+.loader-icon,
+.gen-icon,
+.upg-icon,
+.ach-emoji,
+.parcel {
+  font-family: var(--emoji);
+  font-variant-emoji: emoji;
+  font-style: normal;
+  line-height: 1;
 }
 
 * { box-sizing: border-box; }
@@ -72,7 +93,14 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 }
 
 .brand { display: flex; align-items: center; gap: 0.7rem; }
-.brand-mark { font-size: 2rem; filter: drop-shadow(0 0 12px rgba(233, 164, 75, 0.4)); }
+.brand-mark {
+  font-size: 2rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 0 12px rgba(233, 164, 75, 0.4));
+}
 .brand h1 { font-size: 1.5rem; letter-spacing: 0.04em; }
 .tagline { margin: 0; font-size: 0.78rem; color: var(--ink-faint); font-style: italic; }
 
@@ -168,6 +196,10 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 .loader:active, .loader.pressed { transform: scale(0.955); }
 .loader-icon {
   font-size: 4.4rem;
+  width: 5rem;
+  height: 5rem;
+  display: grid;
+  place-items: center;
   grid-area: 1 / 1;
   transform: translateY(-8px);
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
@@ -340,13 +372,14 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   font: inherit;
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.06s ease;
 }
-.gen:hover { border-color: rgba(233, 164, 75, 0.3); background: rgba(233, 164, 75, 0.06); }
-.gen:active { transform: translateY(1px); }
+.gen:hover:not(:disabled) { border-color: rgba(233, 164, 75, 0.3); background: rgba(233, 164, 75, 0.06); }
+.gen:active:not(:disabled) { transform: translateY(1px); }
+.gen:disabled { cursor: default; opacity: 0.55; }
 .gen.locked { opacity: 0.42; cursor: not-allowed; }
 .gen.locked:hover { border-color: rgba(255, 255, 255, 0.06); background: rgba(255, 255, 255, 0.025); }
 .gen.affordable { border-color: rgba(233, 164, 75, 0.45); }
 
-.gen-icon { font-size: 1.6rem; width: 2rem; text-align: center; }
+.gen-icon { font-size: 1.6rem; width: 2.2rem; height: 2.2rem; display: grid; place-items: center; }
 .gen-name { font-size: 0.98rem; display: block; }
 .gen-blurb { font-size: 0.74rem; color: var(--ink-faint); font-style: italic; display: block; margin-top: 0.1rem; }
 .gen-out { font-size: 0.74rem; color: var(--accent); font-family: var(--mono); display: block; margin-top: 0.15rem; }
@@ -373,10 +406,10 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   color: inherit;
   font: inherit;
 }
-.upg:hover { border-color: rgba(255, 209, 102, 0.35); background: rgba(255, 209, 102, 0.05); }
+.upg:hover:not(:disabled) { border-color: rgba(255, 209, 102, 0.35); background: rgba(255, 209, 102, 0.05); }
 .upg.affordable { border-color: rgba(255, 209, 102, 0.5); }
-.upg:disabled { cursor: not-allowed; opacity: 0.5; }
-.upg-icon { font-size: 1.4rem; width: 1.9rem; text-align: center; }
+.upg:disabled { cursor: default; opacity: 0.55; }
+.upg-icon { font-size: 1.4rem; width: 2rem; height: 2rem; display: grid; place-items: center; }
 .upg-name { font-size: 0.92rem; }
 .upg-desc { font-size: 0.75rem; color: var(--ink-faint); }
 .upg-effect { font-size: 0.75rem; color: var(--accent); }
@@ -413,7 +446,16 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .ach.got { border-color: rgba(233, 164, 75, 0.35); background: rgba(233, 164, 75, 0.07); }
-.ach-emoji { font-size: 1.2rem; filter: grayscale(1); opacity: 0.4; }
+.ach-emoji {
+  font-size: 1.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  flex: none;
+  filter: grayscale(1);
+  opacity: 0.4;
+}
 .ach.got .ach-emoji { filter: none; opacity: 1; }
 .ach-name { font-size: 0.82rem; }
 .ach-desc { font-size: 0.7rem; color: var(--ink-faint); }

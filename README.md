@@ -21,6 +21,13 @@ of ES modules.
   spikes buy permanent upgrades that survive every rebuild.
 - **Milestones** each grant +1% to everything, forever.
 
+The soundtrack is synthesised in the browser — there are no audio files in this
+repo. A low rumble of rolling stock, wheels ticking over rail joints (the rhythm
+picks up as the railway gets busier), the odd distant horn, and short sounds for
+hauling, buying, and catching parcels. Browsers block audio until you interact
+with the page, so it fades in on your first click; **Sound: on/off** in the
+footer turns it off for good, and the choice is saved.
+
 Progress saves to `localStorage` every 20 seconds and whenever you leave the tab,
 and the railway keeps running while you are away (8 hours at 50% by default, more
 once you have hired the night shift). There are Export and Import buttons if you
@@ -55,6 +62,7 @@ also trigger a deploy by hand from the Actions tab.
 | `js/engine.js`      | Costs, multipliers, buying, regauging, the tick            |
 | `js/state.js`       | Save shape, `localStorage`, export/import                  |
 | `js/ui.js`          | DOM rendering                                              |
+| `js/audio.js`       | Web Audio synthesis: ambience, horns, and interface sounds  |
 | `js/background.js`  | The rail network that draws itself behind the page         |
 | `js/main.js`        | Wiring and the game loop                                   |
 | `js/format.js`      | Number and time formatting                                 |

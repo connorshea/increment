@@ -213,6 +213,7 @@ export function doRegauge(S, freshState) {
     startedAt: S.startedAt,
     seenGens: S.seenGens,
     bgOn: S.bgOn,
+    soundOn: S.soundOn,
   });
 
   // Advance Funding opens the new railway with something already running.

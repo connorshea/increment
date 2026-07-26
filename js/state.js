@@ -33,6 +33,7 @@ export function freshState(carry = {}) {
     nextParcel: now + 60_000,
     lastSaved: now,
     bgOn: carry.bgOn ?? true,
+    soundOn: carry.soundOn ?? true,
   };
 }
 
