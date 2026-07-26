@@ -224,6 +224,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
 
 .haul-value { margin: 0; font-size: 0.85rem; color: var(--ink-dim); }
 .haul-value strong { font-family: var(--mono); color: var(--accent); }
+.haul-compare { display: block; font-size: 0.72rem; color: var(--ink-faint); }
 
 .float-num {
   position: fixed;
@@ -542,6 +543,29 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: 0.01em; }
   resize: vertical;
 }
 .modal menu { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0; margin: 0.8rem 0 0; }
+
+/* ---------- the vista ---------- */
+
+/* Open ground below the game so the rail survey on the fixed background canvas
+   can be watched with nothing on top of it. */
+.vista {
+  position: relative;
+  z-index: 1;
+  min-height: 88vh;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.vista-note {
+  margin: 0;
+  align-self: start;
+  padding-top: 1.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  opacity: 0.5;
+}
 
 /* ---------- animations ---------- */
 

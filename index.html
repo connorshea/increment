@@ -41,7 +41,8 @@
       <span class="loader-icon">🚂</span>
       <span class="loader-label">load</span>
     </button>
-    <p class="haul-value">each haul: <strong id="haulval">1</strong></p>
+    <p class="haul-value">each haul: <strong id="haulval">1</strong>
+      <span class="haul-compare" id="haul-compare"></span></p>
 
     <div class="quickstats">
       <div><span class="qs-label">this line</span><span id="qs-run">0</span></div>
@@ -103,11 +104,16 @@
   <button class="btn ghost" id="save-btn">Save</button>
   <button class="btn ghost" id="export-btn">Export</button>
   <button class="btn ghost" id="import-btn">Import</button>
+  <button class="btn ghost" id="vista-btn">View the survey ↓</button>
   <button class="btn ghost" id="sound-btn">Sound: on</button>
   <button class="btn ghost" id="bg-btn">Background: on</button>
   <button class="btn ghost danger-text" id="wipe-btn">Wipe save</button>
   <span class="footer-note">saves to this browser · <span id="save-status">idle</span></span>
 </footer>
+
+<section class="vista" id="vista">
+  <p class="vista-note">the survey, uninterrupted</p>
+</section>
 
 <div id="toast-layer" class="toast-layer" aria-live="polite"></div>
 

@@ -15,6 +15,7 @@ export function initUI(handlers) {
     persec: $('#persec'),
     buffHint: $('#buff-hint'),
     haulval: $('#haulval'),
+    haulCompare: $('#haul-compare'),
     buffbar: $('#buffbar'),
     spikeBadge: $('#spike-badge'),
     spikeNum: $('#spike-num'),
@@ -39,6 +40,9 @@ export function initUI(handlers) {
     saveStatus: $('#save-status'),
     bgBtn: $('#bg-btn'),
     soundBtn: $('#sound-btn'),
+    vista: $('#vista'),
+    vistaBtn: $('#vista-btn'),
+    bgCanvas: $('#bg'),
     parcelLayer: $('#parcel-layer'),
     toastLayer: $('#toast-layer'),
     loader: $('#loader'),
@@ -115,6 +119,19 @@ export function initUI(handlers) {
   $('#import-btn').addEventListener('click', () => handlers.onImport());
   el.bgBtn.addEventListener('click', () => handlers.onToggleBg());
   el.soundBtn.addEventListener('click', () => handlers.onToggleSound());
+  el.vistaBtn.addEventListener('click', () => {
+    el.vista.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  });
+
+  // The canvas is fixed, so scrolling the game out of the way is what reveals
+  // it. Bring it up to full strength as that happens.
+  window.addEventListener('scroll', () => {
+    const t = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 0.55));
+    el.bgCanvas.style.opacity = (0.8 + t * 0.2).toFixed(3);
+    // Brighten only once the game is out of the way — behind the panels it
+    // wants to stay understated.
+    el.bgCanvas.style.filter = `brightness(${(1 + t * 0.55).toFixed(3)})`;
+  }, { passive: true });
 
   // ---- rendering ----------------------------------------------------------
 
@@ -290,6 +307,16 @@ export function initUI(handlers) {
     el.persec.textContent = fmt(stats.perSec);
     el.buffHint.textContent = stats.buffMult > 1 ? `  ×${Math.round(stats.buffMult)}!` : '';
     el.haulval.textContent = fmt(stats.haulValue);
+    // What a haul is actually worth, in terms of the whole railway. Without
+    // this it's impossible to tell whether hauling is still pulling its weight.
+    if (stats.perSec > 0) {
+      const seconds = stats.haulValue / stats.perSec;
+      el.haulCompare.textContent = seconds >= 0.01
+        ? `worth ${seconds < 10 ? seconds.toFixed(2) : fmt(seconds)}s of the whole network`
+        : 'worth less than a hundredth of a second of the network';
+    } else {
+      el.haulCompare.textContent = '';
+    }
     el.qsRun.textContent = fmt(S.runEarned);
     el.qsTotal.textContent = fmt(S.totalEarned);
     el.qsHauls.textContent = fmt(S.hauls);
@@ -324,6 +351,9 @@ export function initUI(handlers) {
     );
     el.bgBtn.textContent = `Background: ${S.bgOn ? 'on' : 'off'}`;
     el.soundBtn.textContent = `Sound: ${S.soundOn ? 'on' : 'off'}`;
+    // No point in a viewing area with nothing to view.
+    el.vista.hidden = !S.bgOn;
+    el.vistaBtn.hidden = !S.bgOn;
   }
 
   function render(S, stats) {
